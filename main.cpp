@@ -237,11 +237,11 @@ int main(void) {
 				"Right:  %s\n"
 				"Down:   %s\n",
 				us_dist.load(),
-				up ? BT_ON : BT_OFF,
-				lt ? BT_ON : BT_OFF,
-				ct ? BT_ON : BT_OFF,
-				rt ? BT_ON : BT_OFF,
-				dn ? BT_ON : BT_OFF);
+				up ? BT_OFF : BT_ON,
+				lt ? BT_OFF : BT_ON,
+				ct ? BT_OFF : BT_ON,
+				rt ? BT_OFF : BT_ON,
+				dn ? BT_OFF : BT_ON);
 		canvas.print(buf);
 
 		sendDataW128128(canvas.getBuffer(), 128*128/8);
