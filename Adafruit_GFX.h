@@ -8,6 +8,10 @@
 #include "gfxfont.h"
 
 class Adafruit_GFX : public Print {
+ protected:
+
+  virtual size_t write(char);
+  virtual size_t write(const char *, size_t);
 
  public:
 
@@ -101,8 +105,6 @@ class Adafruit_GFX : public Print {
     setFont(const GFXfont *f = NULL),
     getTextBounds(char *string, int16_t x, int16_t y,
       int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h);
-
-  virtual size_t write(uint8_t);
 
   int16_t height(void) const;
   int16_t width(void) const;
