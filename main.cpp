@@ -232,6 +232,7 @@ int main(void) {
 		mraa_gpio_write(led3, dn && rt);
 
 		sprintf(buf, "UltraSonic:%7.2f\n"
+				"\n"
 				"Up:     %s\n"
 				"Left:   %s\n"
 				"Center: %s\n"
