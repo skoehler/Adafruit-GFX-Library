@@ -31,13 +31,11 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cstdlib>
+#include <cstring>
+
 #include "Adafruit_GFX.h"
-#include "glcdfont.c"
-#ifdef __AVR__
-  #include <avr/pgmspace.h>
-#elif defined(ESP8266) || defined(ESP32)
-  #include <pgmspace.h>
-#endif
+#include "glcdfont.h"
 
 // Many (but maybe not all) non-AVR board installs define macros
 // for compatibility with existing PROGMEM-reading AVR code.
@@ -80,7 +78,6 @@ WIDTH(w), HEIGHT(h)
     textsize  = 1;
     textcolor = textbgcolor = 0xFFFF;
     wrap      = true;
-    _cp437    = false;
     gfxFont   = NULL;
 }
 
@@ -718,8 +715,6 @@ void Adafruit_GFX::drawChar(int16_t x, int16_t y, unsigned char c,
            ((y + 8 * size - 1) < 0))   // Clip top
             return;
 
-        if(!_cp437 && (c >= 176)) c++; // Handle 'classic' charset behavior
-
         startWrite();
         for(int8_t i=0; i<5; i++ ) { // Char bitmap = 5 columns
             uint8_t line = pgm_read_byte(&font[c * 5 + i]);
@@ -806,17 +801,15 @@ void Adafruit_GFX::drawChar(int16_t x, int16_t y, unsigned char c,
     } // End classic vs custom font
 }
 
-#if ARDUINO >= 100
 size_t Adafruit_GFX::write(uint8_t c) {
-#else
-void Adafruit_GFX::write(uint8_t c) {
-#endif
     if(!gfxFont) { // 'Classic' built-in font
 
         if(c == '\n') {                        // Newline?
             cursor_x  = 0;                     // Reset x to zero,
             cursor_y += textsize * 8;          // advance y one line
-        } else if(c != '\r') {                 // Ignore carriage returns
+        } else if(c == '\r') {
+            cursor_x  = 0;                     // Reset x to zero,
+        } else {
             if(wrap && ((cursor_x + textsize * 6) > _width)) { // Off right?
                 cursor_x  = 0;                 // Reset x to zero,
                 cursor_y += textsize * 8;      // advance y one line
@@ -852,9 +845,7 @@ void Adafruit_GFX::write(uint8_t c) {
         }
 
     }
-#if ARDUINO >= 100
     return 1;
-#endif
 }
 
 void Adafruit_GFX::setCursor(int16_t x, int16_t y) {
@@ -885,7 +876,7 @@ void Adafruit_GFX::setTextColor(uint16_t c, uint16_t b) {
     textbgcolor = b;
 }
 
-void Adafruit_GFX::setTextWrap(boolean w) {
+void Adafruit_GFX::setTextWrap(bool w) {
     wrap = w;
 }
 
@@ -907,17 +898,6 @@ void Adafruit_GFX::setRotation(uint8_t x) {
             _height = WIDTH;
             break;
     }
-}
-
-// Enable (or disable) Code Page 437-compatible charset.
-// There was an error in glcdfont.c for the longest time -- one character
-// (#176, the 'light shade' block) was missing -- this threw off the index
-// of every character that followed it.  But a TON of code has been written
-// with the erroneous character indices.  By default, the library uses the
-// original 'wrong' behavior and old sketches will still work.  Pass 'true'
-// to this function to use correct CP437 character values in your code.
-void Adafruit_GFX::cp437(boolean x) {
-    _cp437 = x;
 }
 
 void Adafruit_GFX::setFont(const GFXfont *f) {
@@ -1019,30 +999,6 @@ void Adafruit_GFX::getTextBounds(char *str, int16_t x, int16_t y,
     }
 }
 
-// Same as above, but for PROGMEM strings
-void Adafruit_GFX::getTextBounds(const __FlashStringHelper *str,
-        int16_t x, int16_t y, int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h) {
-    uint8_t *s = (uint8_t *)str, c;
-
-    *x1 = x;
-    *y1 = y;
-    *w  = *h = 0;
-
-    int16_t minx = _width, miny = _height, maxx = -1, maxy = -1;
-
-    while((c = pgm_read_byte(s++)))
-        charBounds(c, &x, &y, &minx, &miny, &maxx, &maxy);
-
-    if(maxx >= minx) {
-        *x1 = minx;
-        *w  = maxx - minx + 1;
-    }
-    if(maxy >= miny) {
-        *y1 = miny;
-        *h  = maxy - miny + 1;
-    }
-}
-
 // Return the size of the display (per current rotation)
 int16_t Adafruit_GFX::width(void) const {
     return _width;
@@ -1052,7 +1008,7 @@ int16_t Adafruit_GFX::height(void) const {
     return _height;
 }
 
-void Adafruit_GFX::invertDisplay(boolean i) {
+void Adafruit_GFX::invertDisplay(bool i) {
     // Do nothing, must be subclassed if supported by hardware
 }
 
@@ -1092,7 +1048,7 @@ void Adafruit_GFX_Button::initButtonUL(
   strncpy(_label, label, 9);
 }
 
-void Adafruit_GFX_Button::drawButton(boolean inverted) {
+void Adafruit_GFX_Button::drawButton(bool inverted) {
   uint16_t fill, outline, text;
 
   if(!inverted) {
@@ -1116,19 +1072,19 @@ void Adafruit_GFX_Button::drawButton(boolean inverted) {
   _gfx->print(_label);
 }
 
-boolean Adafruit_GFX_Button::contains(int16_t x, int16_t y) {
+bool Adafruit_GFX_Button::contains(int16_t x, int16_t y) {
   return ((x >= _x1) && (x < (_x1 + _w)) &&
           (y >= _y1) && (y < (_y1 + _h)));
 }
 
-void Adafruit_GFX_Button::press(boolean p) {
+void Adafruit_GFX_Button::press(bool p) {
   laststate = currstate;
   currstate = p;
 }
 
-boolean Adafruit_GFX_Button::isPressed() { return currstate; }
-boolean Adafruit_GFX_Button::justPressed() { return (currstate && !laststate); }
-boolean Adafruit_GFX_Button::justReleased() { return (!currstate && laststate); }
+bool Adafruit_GFX_Button::isPressed() { return currstate; }
+bool Adafruit_GFX_Button::justPressed() { return (currstate && !laststate); }
+bool Adafruit_GFX_Button::justReleased() { return (!currstate && laststate); }
 
 // -------------------------------------------------------------------------
 

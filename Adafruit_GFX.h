@@ -1,12 +1,10 @@
 #ifndef _ADAFRUIT_GFX_H
 #define _ADAFRUIT_GFX_H
 
-#if ARDUINO >= 100
- #include "Arduino.h"
- #include "Print.h"
-#else
- #include "WProgram.h"
-#endif
+#include <cstddef>
+#include <cstdint>
+
+#include "Print.h"
 #include "gfxfont.h"
 
 class Adafruit_GFX : public Print {
@@ -14,6 +12,7 @@ class Adafruit_GFX : public Print {
  public:
 
   Adafruit_GFX(int16_t w, int16_t h); // Constructor
+  virtual ~Adafruit_GFX();
 
   // This MUST be defined by the subclass:
   virtual void drawPixel(int16_t x, int16_t y, uint16_t color) = 0;
@@ -33,7 +32,7 @@ class Adafruit_GFX : public Print {
   // These MAY be overridden by the subclass to provide device-specific
   // optimized code.  Otherwise 'generic' versions are used.
   virtual void setRotation(uint8_t r);
-  virtual void invertDisplay(boolean i);
+  virtual void invertDisplay(bool i);
 
   // BASIC DRAW API
   // These MAY be overridden by the subclass to provide device-specific
@@ -98,19 +97,12 @@ class Adafruit_GFX : public Print {
     setTextColor(uint16_t c),
     setTextColor(uint16_t c, uint16_t bg),
     setTextSize(uint8_t s),
-    setTextWrap(boolean w),
-    cp437(boolean x=true),
+    setTextWrap(bool w),
     setFont(const GFXfont *f = NULL),
     getTextBounds(char *string, int16_t x, int16_t y,
-      int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h),
-    getTextBounds(const __FlashStringHelper *s, int16_t x, int16_t y,
       int16_t *x1, int16_t *y1, uint16_t *w, uint16_t *h);
 
-#if ARDUINO >= 100
   virtual size_t write(uint8_t);
-#else
-  virtual void   write(uint8_t);
-#endif
 
   int16_t height(void) const;
   int16_t width(void) const;
@@ -135,9 +127,8 @@ class Adafruit_GFX : public Print {
   uint8_t
     textsize,
     rotation;
-  boolean
-    wrap,   // If set, 'wrap' text at right edge of display
-    _cp437; // If set, use correct CP437 charset (default is off)
+  bool
+    wrap;   // If set, 'wrap' text at right edge of display
   GFXfont
     *gfxFont;
 };
@@ -154,13 +145,13 @@ class Adafruit_GFX_Button {
   void initButtonUL(Adafruit_GFX *gfx, int16_t x1, int16_t y1,
    uint16_t w, uint16_t h, uint16_t outline, uint16_t fill,
    uint16_t textcolor, char *label, uint8_t textsize);
-  void drawButton(boolean inverted = false);
-  boolean contains(int16_t x, int16_t y);
+  void drawButton(bool inverted = false);
+  bool contains(int16_t x, int16_t y);
 
-  void press(boolean p);
-  boolean isPressed();
-  boolean justPressed();
-  boolean justReleased();
+  void press(bool p);
+  bool isPressed();
+  bool justPressed();
+  bool justReleased();
 
  private:
   Adafruit_GFX *_gfx;
@@ -170,7 +161,7 @@ class Adafruit_GFX_Button {
   uint16_t      _outlinecolor, _fillcolor, _textcolor;
   char          _label[10];
 
-  boolean currstate, laststate;
+  bool currstate, laststate;
 };
 
 class GFXcanvas1 : public Adafruit_GFX {
