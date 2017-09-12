@@ -1,2 +1,6 @@
-default.vim
-fontconvert/fontconvert
+/fontconvert/fontconvert
+/Debug/
+/Release/
+/.settings/
+/.project
+/.cproject
