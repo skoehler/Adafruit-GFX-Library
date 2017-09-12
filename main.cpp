@@ -57,13 +57,11 @@ void runUS() {
 	}
 }
 
-
-
 /*********************************************************************************
  Global variables
  *********************************************************************************/
 uint8_t disp_buf[20]; //SPI command buffer
-uint8_t disp_data[128*128/2]; //SPI data buffer
+uint8_t disp_data[128 * 128 / 2]; //SPI data buffer
 const uint8_t disp_lookup[4] = { 0x0, 0xF, 0xF0, 0xFF }; //lookup table
 
 mraa_spi_context disp_spi;
@@ -77,7 +75,6 @@ uint8_t data[DATASIZE];
  Description: Initialization of the display
  *********************************************************************************/
 
-
 void setReset(int val) {
 	mraa_result_t r;
 	r = mraa_gpio_write(disp_rst, val);
@@ -90,7 +87,7 @@ void setDC(int val) {
 	debug("setDC", r);
 }
 
-void waitforemptybuffer() {
+static inline void waitforemptybuffer() {
 	//TODO
 }
 
@@ -118,9 +115,9 @@ void initW128128(void) {
 	disp_buf[i++] = 0xAF; //Display on
 	disp_buf[i++] = 0xA0; //set memory addressing mode ...
 	disp_buf[i++] = 0x51; //... to horizontal address increment
-	//..enable column address remap
-	//...enable COM remap
-	//...enable COM split odd even
+						  //..enable column address remap
+						  //...enable COM remap
+						  //...enable COM split odd even
 	disp_buf[i++] = 0xA1;
 	disp_buf[i++] = 0x00; //set display start line to 0
 	waitforemptybuffer(); //Waits until SPI buffer is empty
@@ -170,7 +167,6 @@ void sendDataW128128(const uint8_t *tx_buf, uint16_t tx_num) {
 	R_RSPI0_Send(disp_data, (tx_num << 2)); //send data buffer via SPI
 }
 
-
 int main(void) {
 	us_trig = mraa_gpio_init(12);
 	us_echo = mraa_gpio_init(18);
@@ -185,7 +181,7 @@ int main(void) {
 	debug("initspi", disp_spi);
 	r = mraa_spi_mode(disp_spi, MRAA_SPI_MODE0);
 	debug("mode", r);
-	r = mraa_spi_frequency(disp_spi, 32*1000*1000);
+	r = mraa_spi_frequency(disp_spi, 32 * 1000 * 1000);
 	debug("freq", r);
 	r = mraa_spi_bit_per_word(disp_spi, 8);
 	debug("bits", r);
@@ -197,17 +193,19 @@ int main(void) {
 	while (1) {
 		r = mraa_gpio_dir(disp_dc, MRAA_GPIO_OUT);
 		debug("dir", r);
-		if (r == MRAA_SUCCESS) break;
-		usleep(100*1000);
-        }
+		if (r == MRAA_SUCCESS)
+			break;
+		usleep(100 * 1000);
+	}
 
 	disp_rst = mraa_gpio_init(15);
 	debug("initrst", disp_rst);
 	while (1) {
 		r = mraa_gpio_dir(disp_rst, MRAA_GPIO_OUT);
 		debug("dir", r);
-		if (r == MRAA_SUCCESS) break;
-		usleep(100*1000);
+		if (r == MRAA_SUCCESS)
+			break;
+		usleep(100 * 1000);
 	}
 
 	initW128128();
@@ -215,13 +213,13 @@ int main(void) {
 
 	int j = 0;
 	while (1) {
-	for (int i=0; i<DATASIZE; i++) {
-		data[i] = 1 << j;
-	}
-	j = (j+1) % 8;
+		for (int i = 0; i < DATASIZE; i++) {
+			data[i] = 1 << j;
+		}
+		j = (j + 1) % 8;
 
-	sendDataW128128(data, DATASIZE);
-	usleep(20*1000);
+		sendDataW128128(data, DATASIZE);
+		usleep(20 * 1000);
 	}
 
 	r = mraa_spi_stop(disp_spi);
@@ -230,7 +228,6 @@ int main(void) {
 	debug("close dc", r);
 	r = mraa_gpio_close(disp_rst);
 	debug("close reset", r);
-
 
 	t_us.join();
 }
