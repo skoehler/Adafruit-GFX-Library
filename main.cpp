@@ -231,19 +231,20 @@ int main(void) {
 		mraa_gpio_write(led2, ct);
 		mraa_gpio_write(led3, dn && rt);
 
-		sprintf(buf, "UltraSonic:%7.2f\n"
-				"\n"
+		sprintf(buf, "\n"
 				"Up:     %s\n"
 				"Left:   %s\n"
 				"Center: %s\n"
 				"Right:  %s\n"
-				"Down:   %s\n",
-				us_dist.load(),
+				"Down:   %s\n"
+				"\n"
+				"US Dist:%7.2f\n",
 				up ? BT_OFF : BT_ON,
 				lt ? BT_OFF : BT_ON,
 				ct ? BT_OFF : BT_ON,
 				rt ? BT_OFF : BT_ON,
-				dn ? BT_OFF : BT_ON);
+				dn ? BT_OFF : BT_ON,
+				us_dist.load());
 		canvas.print(buf);
 
 		sendDataW128128(canvas.getBuffer(), 128*128/8);
