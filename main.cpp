@@ -5,6 +5,9 @@
 #include <unistd.h>
 #include <mraa.h>
 
+#include "Adafruit_GFX.h"
+
+
 #define US_OFF  1
 #define US_ON   0
 #define US_LOW  1
@@ -67,8 +70,6 @@ const uint8_t disp_lookup[4] = { 0x0, 0xF, 0xF0, 0xFF }; //lookup table
 mraa_spi_context disp_spi;
 mraa_gpio_context disp_dc;
 mraa_gpio_context disp_rst;
-#define DATASIZE (128*128/8)
-uint8_t data[DATASIZE];
 
 /*********************************************************************************
  Function name: initW128128
@@ -91,14 +92,14 @@ static inline void waitforemptybuffer() {
 	//TODO
 }
 
-void ms_delay(int ms) {
+static inline void ms_delay(int ms) {
 	usleep(ms * 1000);
 }
 
-void R_RSPI0_Send(uint8_t *buf, size_t len) {
-	mraa_result_t r;
-	r = mraa_spi_transfer_buf(disp_spi, buf, NULL, len);
-	debug("SPI send", r);
+static inline void R_RSPI0_Send(uint8_t *buf, size_t len) {
+//	mraa_result_t r;
+	mraa_spi_transfer_buf(disp_spi, buf, NULL, len);
+//	debug("SPI send", r);
 }
 
 void initW128128(void) {
@@ -211,23 +212,14 @@ int main(void) {
 	initW128128();
 	initWindow(0, 127, 0, 127);
 
-	int j = 0;
-	while (1) {
-		for (int i = 0; i < DATASIZE; i++) {
-			data[i] = 1 << j;
-		}
-		j = (j + 1) % 8;
+	GFXcanvas1 canvas(128, 128);
 
-		sendDataW128128(data, DATASIZE);
+	while (1) {
+		canvas.setCursor(10, 10);
+		canvas.print("Hello World!");
+
+		sendDataW128128(canvas.getBuffer(), 128*128/8);
 		usleep(20 * 1000);
 	}
 
-	r = mraa_spi_stop(disp_spi);
-	debug("close spi", r);
-	r = mraa_gpio_close(disp_dc);
-	debug("close dc", r);
-	r = mraa_gpio_close(disp_rst);
-	debug("close reset", r);
-
-	t_us.join();
 }
