@@ -226,9 +226,9 @@ int main(void) {
 		rt = mraa_gpio_read(bt_rt);
 		dn = mraa_gpio_read(bt_dn);
 
-		mraa_gpio_write(led1, up || lt);
+		mraa_gpio_write(led1, up && lt);
 		mraa_gpio_write(led2, ct);
-		mraa_gpio_write(led3, dn || rt);
+		mraa_gpio_write(led3, dn && rt);
 
 		sprintf(buf, "UltraSonic:%7.2f\n"
 				"Up:     %s\n"
