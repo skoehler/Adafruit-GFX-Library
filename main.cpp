@@ -38,6 +38,11 @@ void gpio_dir(mraa_gpio_context g, mraa_gpio_dir_t dir) {
 		usleep(100 * 1000);
 	}
 }
+mraa_gpio_context gpio_init(int pin, mraa_gpio_dir_t dir) {
+	mraa_gpio_context c = mraa_gpio_init(pin);
+	gpio_dir(c, dir);
+	return c;
+}
 
 void runUS() {
 	mraa_gpio_write(us_trig, US_OFF);
@@ -164,18 +169,13 @@ void sendDataW128128(const uint8_t *tx_buf, uint16_t tx_num) {
 		}
 	}
 	waitforemptybuffer(); //waits until SPI buffer is empty
-	setDC(1); //set D/C# pin high
 	R_RSPI0_Send(disp_data, (tx_num << 2)); //send data buffer via SPI
 }
 
+#define BT_ON "X"
+#define BT_OFF "O"
+
 int main(void) {
-	us_trig = mraa_gpio_init(12);
-	us_echo = mraa_gpio_init(18);
-	gpio_dir(us_trig, MRAA_GPIO_OUT);
-	gpio_dir(us_echo, MRAA_GPIO_IN);
-
-	std::thread t_us(runUS);
-
 	mraa_result_t r;
 
 	disp_spi = mraa_spi_init_raw(0, 0);
@@ -189,34 +189,60 @@ int main(void) {
 	r = mraa_spi_lsbmode(disp_spi, 0);
 	debug("lsb", r);
 
-	disp_dc = mraa_gpio_init(29);
-	debug("initdc", disp_dc);
-	while (1) {
-		r = mraa_gpio_dir(disp_dc, MRAA_GPIO_OUT);
-		debug("dir", r);
-		if (r == MRAA_SUCCESS)
-			break;
-		usleep(100 * 1000);
-	}
+	disp_dc = gpio_init(29, MRAA_GPIO_OUT);
+	disp_rst = gpio_init(15, MRAA_GPIO_OUT);
 
-	disp_rst = mraa_gpio_init(15);
-	debug("initrst", disp_rst);
-	while (1) {
-		r = mraa_gpio_dir(disp_rst, MRAA_GPIO_OUT);
-		debug("dir", r);
-		if (r == MRAA_SUCCESS)
-			break;
-		usleep(100 * 1000);
-	}
+	us_trig = gpio_init(12, MRAA_GPIO_OUT);
+	us_echo = gpio_init(18, MRAA_GPIO_IN);
+
+	mraa_gpio_context bt_up = gpio_init(36, MRAA_GPIO_IN);
+	mraa_gpio_context bt_lt = gpio_init(32, MRAA_GPIO_IN);
+	mraa_gpio_context bt_ct = gpio_init(38, MRAA_GPIO_IN);
+	mraa_gpio_context bt_rt = gpio_init(40, MRAA_GPIO_IN);
+	mraa_gpio_context bt_dn = gpio_init(31, MRAA_GPIO_IN);
+
+	mraa_gpio_context led1 = gpio_init(33, MRAA_GPIO_OUT);
+	mraa_gpio_context led2 = gpio_init(35, MRAA_GPIO_OUT);
+	mraa_gpio_context led3 = gpio_init(37, MRAA_GPIO_OUT);
 
 	initW128128();
 	initWindow(0, 127, 0, 127);
+	setDC(1); //set D/C# pin high
 
 	GFXcanvas1 canvas(128, 128);
+	char buf[1024];
+
+	std::thread t_us(runUS);
+
+	int up, lt, ct, rt, dn;
 
 	while (1) {
-		canvas.setCursor(10, 10);
-		canvas.print("Hello World!");
+		canvas.fillRect(0, 0, 128, 128, 0);
+		canvas.setCursor(0, 0);
+
+		up = mraa_gpio_read(bt_up);
+		lt = mraa_gpio_read(bt_lt);
+		ct = mraa_gpio_read(bt_ct);
+		rt = mraa_gpio_read(bt_rt);
+		dn = mraa_gpio_read(bt_dn);
+
+		mraa_gpio_write(led1, up || lt);
+		mraa_gpio_write(led2, ct);
+		mraa_gpio_write(led3, dn || rt);
+
+		sprintf(buf, "UltraSonic:%7.2f\n"
+				"Up:     %s\n"
+				"Left:   %s\n"
+				"Center: %s\n"
+				"Right:  %s\n"
+				"Down:   %s\n",
+				us_dist.load(),
+				up ? BT_ON : BT_OFF,
+				lt ? BT_ON : BT_OFF,
+				ct ? BT_ON : BT_OFF,
+				rt ? BT_ON : BT_OFF,
+				dn ? BT_ON : BT_OFF);
+		canvas.print(buf);
 
 		sendDataW128128(canvas.getBuffer(), 128*128/8);
 		usleep(20 * 1000);
