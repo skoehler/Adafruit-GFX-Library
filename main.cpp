@@ -45,6 +45,7 @@ mraa_gpio_context gpio_init(int pin, mraa_gpio_dir_t dir) {
 }
 
 void runUS() {
+	us_dist.store(0.0/0.0);
 	mraa_gpio_write(us_trig, US_OFF);
 
 	while (1) {
