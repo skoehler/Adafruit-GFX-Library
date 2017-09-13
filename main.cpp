@@ -1,4 +1,5 @@
 #include <cinttypes>
+#include <cstring>
 #include <atomic>
 #include <thread>
 
@@ -230,6 +231,7 @@ static inline uint16_t decodeU16LE(uint8_t *buf) {
 
 void getAccel(mraa_i2c_context i2c, double *data) {
 	uint8_t buf[6];
+	memset(buf, 0, sizeof(buf));
 	mraa_i2c_read_bytes_data(i2c, MPU_ACCEL_OUT, buf, 6);
 	double f = 2.0 / 32768.0;
 	data[0] = decodeS16BE(buf + 0) * f;
@@ -266,6 +268,7 @@ void initBME280(mraa_i2c_context i2c) {
 	BME280_REGISTER_CONTROL); // Set Temp/Pressure Oversample and enter Normal mode
 
 	uint8_t buf[6];
+	memset(buf, 0, sizeof(buf));
 	mraa_i2c_read_bytes_data(i2c, BME280_REGISTER_DIG_T1, buf, 6);
 	dig_T1 = decodeU16LE(buf+0);
 	dig_T2 = decodeS16LE(buf+2);
@@ -274,6 +277,7 @@ void initBME280(mraa_i2c_context i2c) {
 
 int32_t getTemp(mraa_i2c_context i2c) {
 	uint8_t buf[8];
+	memset(buf, 0, sizeof(buf));
 	mraa_i2c_read_bytes_data(i2c, BME280_REGISTER_DATA, buf, 8);
 	return (buf[3] << 12) | (buf[4] << 4) | (buf[5] >> 4);
 }
