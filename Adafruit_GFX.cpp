@@ -783,15 +783,13 @@ void Adafruit_GFX::drawChar(int16_t x, int16_t y, unsigned char c,
     } // End classic vs custom font
 }
 
-size_t Adafruit_GFX::write(const char *data, size_t len) {
-	size_t r = 0;
+void Adafruit_GFX::write(const char *data, size_t len) {
 	for (size_t i=0; i<len; i++) {
-		r += this->Adafruit_GFX::write(data[i]);
+		this->Adafruit_GFX::write(data[i]);
 	}
-	return r;
 }
 
-size_t Adafruit_GFX::write(char c2) {
+void Adafruit_GFX::write(char c2) {
 	uint8_t c = (uint8_t)c2;
     if(!gfxFont) { // 'Classic' built-in font
 
@@ -836,7 +834,6 @@ size_t Adafruit_GFX::write(char c2) {
         }
 
     }
-    return 1;
 }
 
 void Adafruit_GFX::setCursor(int16_t x, int16_t y) {

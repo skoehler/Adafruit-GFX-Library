@@ -13,8 +13,8 @@ class Adafruit_GFX : public Print {
   void drawChar(int16_t x, int16_t y, unsigned char c, uint16_t color,
       uint16_t bg, uint8_t size);
 
-  virtual size_t write(char);
-  virtual size_t write(const char *, size_t);
+  void write(char);
+  virtual void write(const char *, size_t);
 
  public:
 
