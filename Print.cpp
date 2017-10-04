@@ -6,7 +6,7 @@
 #include "Print.h"
 
 void Print::print(char c) {
-	this->write(&c, 1);
+	this->write(c);
 }
 
 void Print::print(const char *data) {
@@ -117,47 +117,47 @@ void Print::print(double v, int decimals) {
 static const char nl = '\n';
 
 void Print::println(void) {
-	this->write(&nl, 1);
+	this->write(nl);
 }
 void Print::println(char c) {
-	this->write(&c, 1);
-	this->write(&nl, 1);
+	this->write(c);
+	this->write(nl);
 }
 void Print::println(const char *v) {
 	this->write(v, strlen(v));
-	this->write(&nl, 1);
+	this->write(nl);
 }
 void Print::println(const char *v, size_t len) {
 	this->write(v, len);
-	this->write(&nl, 1);
+	this->write(nl);
 }
 void Print::println(const std::string &v){
 	this->write(v.data(), v.length());
-	this->write(&nl, 1);
+	this->write(nl);
 }
 void Print::println(int32_t v, int radix){
 	this->print(v, radix);
-	this->write(&nl, 1);
+	this->write(nl);
 }
 void Print::println(int64_t v, int radix){
 	this->print(v, radix);
-	this->write(&nl, 1);
+	this->write(nl);
 }
 void Print::println(uint32_t v, int radix){
 	this->print(v, radix);
-	this->write(&nl, 1);
+	this->write(nl);
 }
 void Print::println(uint64_t v, int radix){
 	this->print(v, radix);
-	this->write(&nl, 1);
+	this->write(nl);
 }
 void Print::println(float v, int decimals){
 	this->print(v, decimals);
-	this->write(&nl, 1);
+	this->write(nl);
 }
 void Print::println(double v, int decimals){
 	this->print(v, decimals);
-	this->write(&nl, 1);
+	this->write(nl);
 }
 
 

@@ -7,6 +7,7 @@
 
 class Print {
   protected:
+    virtual void write(char) = 0;
     virtual void write(const char *, size_t) = 0;
   public:
     Print() {}
