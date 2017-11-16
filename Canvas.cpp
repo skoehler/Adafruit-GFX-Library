@@ -31,29 +31,30 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "Canvas.h"
+
 #include <cstdlib>
 #include <cstring>
 
-#include "Adafruit_GFX.h"
 #include "glcdfont.h"
 
 static inline int16_t min(int16_t a, int16_t b) {
 	return a < b ? a : b;
 }
-static inline void _swap_int16_t(Adafruit_GFX::coord_t &a, Adafruit_GFX::coord_t &b) {
-	Adafruit_GFX::coord_t t = a;
+static inline void _swap_int16_t(Canvas::coord_t &a, Canvas::coord_t &b) {
+	Canvas::coord_t t = a;
 	a = b;
 	b = t;
 }
-static inline void _sort_int16_t(Adafruit_GFX::coord_t &a, Adafruit_GFX::coord_t &b) {
+static inline void _sort_int16_t(Canvas::coord_t &a, Canvas::coord_t &b) {
 	if (a > b) {
-		Adafruit_GFX::coord_t t = a;
+		Canvas::coord_t t = a;
 		a = b;
 		b = t;
 	}
 }
 
-Adafruit_GFX::Adafruit_GFX(coord_t w, coord_t h) :
+Canvas::Canvas(coord_t w, coord_t h) :
 		WIDTH(w), HEIGHT(h) {
 	cursor_y = cursor_x = 0;
 	textheight = 1;
@@ -65,12 +66,12 @@ Adafruit_GFX::Adafruit_GFX(coord_t w, coord_t h) :
 	setTextColor(COLOR_WHITE);
 }
 
-Adafruit_GFX::~Adafruit_GFX() {
+Canvas::~Canvas() {
 	// nothing
 }
 
 // Bresenham's algorithm - thx wikpedia
-void Adafruit_GFX::writeLine(coord_t x0, coord_t y0, coord_t x1, coord_t y1, color_t color) {
+void Canvas::writeLine(coord_t x0, coord_t y0, coord_t x1, coord_t y1, color_t color) {
 	coord_t steep = abs(y1 - y0) > abs(x1 - x0);
 	if (steep) {
 		_swap_int16_t(x0, y0);
@@ -111,7 +112,7 @@ void Adafruit_GFX::writeLine(coord_t x0, coord_t y0, coord_t x1, coord_t y1, col
 
 // (x,y) is topmost point; if unsure, calling function
 // should sort endpoints or call writeLine() instead
-void Adafruit_GFX::writeVLine(coord_t x0, coord_t y0, coord_t y1, color_t color) {
+void Canvas::writeVLine(coord_t x0, coord_t y0, coord_t y1, color_t color) {
 	for (int16_t y = y0; y <= y1; y++) {
 		writePixel(x0, y, color);
 	}
@@ -119,13 +120,13 @@ void Adafruit_GFX::writeVLine(coord_t x0, coord_t y0, coord_t y1, color_t color)
 
 // (x,y) is leftmost point; if unsure, calling function
 // should sort endpoints or call writeLine() instead
-void Adafruit_GFX::writeHLine(coord_t x0, coord_t y0, coord_t x1, color_t color) {
+void Canvas::writeHLine(coord_t x0, coord_t y0, coord_t x1, color_t color) {
 	for (int16_t x = x0; x <= x1; x++) {
 		writePixel(x, y0, color);
 	}
 }
 
-void Adafruit_GFX::fillRect(coord_t x0, coord_t y0, coord_t x1, coord_t y1) {
+void Canvas::fillRect(coord_t x0, coord_t y0, coord_t x1, coord_t y1) {
 	coord_t rx0 = realX(x0, y0);
 	coord_t ry0 = realY(x0, y0);
 	coord_t rx1 = realX(x1, y1);
@@ -139,17 +140,25 @@ void Adafruit_GFX::fillRect(coord_t x0, coord_t y0, coord_t x1, coord_t y1) {
 	}
 }
 
-void Adafruit_GFX::clearScreen() {
+void Canvas::clearScreen() {
 	for (int y = 0; y < HEIGHT; y++) {
 		writeHLine(0, y, WIDTH - 1, colors.drawbg);
 	}
 }
 
-void Adafruit_GFX::drawLine(coord_t x0, coord_t y0, coord_t x1, coord_t y1) {
+void Canvas::drawPixel(coord_t x, coord_t y) {
+	coord_t rx = realX(x, y);
+	coord_t ry = realY(x, y);
+
+	writePixel(rx, ry, colors.draw);
+}
+
+void Canvas::drawLine(coord_t x0, coord_t y0, coord_t x1, coord_t y1) {
 	coord_t rx0 = realX(x0, y0);
 	coord_t ry0 = realY(x0, y0);
 	coord_t rx1 = realX(x1, y1);
 	coord_t ry1 = realY(x1, y1);
+
 	if (rx0 == rx1) {
 		_sort_int16_t(y0, y1);
 		writeVLine(rx0, ry0, ry1, colors.draw);
@@ -162,7 +171,7 @@ void Adafruit_GFX::drawLine(coord_t x0, coord_t y0, coord_t x1, coord_t y1) {
 }
 
 // Draw a circle outline
-void Adafruit_GFX::drawCircle(coord_t x0, coord_t y0, coord_t r) {
+void Canvas::drawCircle(coord_t x0, coord_t y0, coord_t r) {
 	coord_t rx0 = realX(x0, y0);
 	coord_t ry0 = realY(x0, y0);
 
@@ -200,7 +209,7 @@ void Adafruit_GFX::drawCircle(coord_t x0, coord_t y0, coord_t r) {
 //    }
 }
 
-void Adafruit_GFX::drawCircleHelper(coord_t x0, coord_t y0, coord_t r, coord_t deltaX, coord_t deltaY) {
+void Canvas::drawCircleHelper(coord_t x0, coord_t y0, coord_t r, coord_t deltaX, coord_t deltaY) {
 	int16_t f = 1 - r;
 	int16_t ddF_x = 1;
 	int16_t ddF_y = -2 * r;
@@ -227,15 +236,15 @@ void Adafruit_GFX::drawCircleHelper(coord_t x0, coord_t y0, coord_t r, coord_t d
 	}
 }
 
-void Adafruit_GFX::fillCircle(coord_t x0, coord_t y0, coord_t r) {
+void Canvas::fillCircle(coord_t x0, coord_t y0, coord_t r) {
 	coord_t rx0 = realX(x0, y0);
 	coord_t ry0 = realY(x0, y0);
 
-	fillCircleHelper(x0, y0, r, 0, 0);
+	fillCircleHelper(rx0, ry0, r, 0, 0);
 }
 
 // Used to do circles and roundrects
-void Adafruit_GFX::fillCircleHelper(coord_t x0, coord_t y0, coord_t r, coord_t deltaX, coord_t deltaY) {
+void Canvas::fillCircleHelper(coord_t x0, coord_t y0, coord_t r, coord_t deltaX, coord_t deltaY) {
 
 	int16_t f = 1 - r;
 	int16_t ddF_x = 1;
@@ -261,7 +270,7 @@ void Adafruit_GFX::fillCircleHelper(coord_t x0, coord_t y0, coord_t r, coord_t d
 }
 
 // Draw a rectangle
-void Adafruit_GFX::drawRect(coord_t x0, coord_t y0, coord_t x1, coord_t y1) {
+void Canvas::drawRect(coord_t x0, coord_t y0, coord_t x1, coord_t y1) {
 	coord_t rx0 = realX(x0, y0);
 	coord_t ry0 = realY(x0, y0);
 	coord_t rx1 = realX(x1, y1);
@@ -277,7 +286,7 @@ void Adafruit_GFX::drawRect(coord_t x0, coord_t y0, coord_t x1, coord_t y1) {
 }
 
 // Draw a rounded rectangle
-void Adafruit_GFX::drawRoundRect(coord_t x0, coord_t y0, coord_t x1, coord_t y1, coord_t r) {
+void Canvas::drawRoundRect(coord_t x0, coord_t y0, coord_t x1, coord_t y1, coord_t r) {
 	coord_t rx0 = realX(x0, y0);
 	coord_t ry0 = realY(x0, y0);
 	coord_t rx1 = realX(x1, y1);
@@ -296,7 +305,7 @@ void Adafruit_GFX::drawRoundRect(coord_t x0, coord_t y0, coord_t x1, coord_t y1,
 }
 
 // Fill a rounded rectangle
-void Adafruit_GFX::fillRoundRect(coord_t x0, coord_t y0, coord_t x1, coord_t y1, coord_t r) {
+void Canvas::fillRoundRect(coord_t x0, coord_t y0, coord_t x1, coord_t y1, coord_t r) {
 	coord_t rx0 = realX(x0, y0);
 	coord_t ry0 = realY(x0, y0);
 	coord_t rx1 = realX(x1, y1);
@@ -318,7 +327,7 @@ void Adafruit_GFX::fillRoundRect(coord_t x0, coord_t y0, coord_t x1, coord_t y1,
 
 // Draw a RAM-resident 1-bit image at the specified (x,y) position,
 // using the specified foreground color (unset bits are transparent).
-void Adafruit_GFX::drawBitmap(coord_t x, coord_t y, const uint8_t *bitmap, coord_t w, coord_t h) {
+void Canvas::drawBitmap(coord_t x, coord_t y, const uint8_t *bitmap, coord_t w, coord_t h) {
 
 	int16_t byteWidth = (w + 7) / 8; // Bitmap scanline pad = whole byte
 	uint8_t byte = 0;
@@ -338,7 +347,7 @@ void Adafruit_GFX::drawBitmap(coord_t x, coord_t y, const uint8_t *bitmap, coord
 // Draw a RAM-resident 1-bit image at the specified (x,y) position,
 // using the specified foreground (for set bits) and background (unset
 // bits) colors.
-void Adafruit_GFX::drawBitmap(coord_t x, coord_t y, const uint8_t *bitmap, const uint8_t *mask, coord_t w, coord_t h) {
+void Canvas::drawBitmap(coord_t x, coord_t y, const uint8_t *bitmap, const uint8_t *mask, coord_t w, coord_t h) {
 
 	int16_t byteWidth = (w + 7) / 8; // Bitmap scanline pad = whole byte
 	uint8_t byte = 0;
@@ -357,7 +366,7 @@ void Adafruit_GFX::drawBitmap(coord_t x, coord_t y, const uint8_t *bitmap, const
 // Draw a RAM-resident 8-bit image (grayscale) at the specified (x,y)
 // pos.  Specifically for 8-bit display devices such as IS31FL3731;
 // no color reduction/expansion is performed.
-void Adafruit_GFX::drawGrayscaleImage(coord_t x, coord_t y, const uint8_t *bitmap, coord_t w, coord_t h) {
+void Canvas::drawGrayscaleImage(coord_t x, coord_t y, const uint8_t *bitmap, coord_t w, coord_t h) {
 	for (int16_t j = 0; j < h; j++, y++) {
 		for (int16_t i = 0; i < w; i++) {
 			writePixel(x + i, y, bitmap[j * w + i]);
@@ -370,7 +379,7 @@ void Adafruit_GFX::drawGrayscaleImage(coord_t x, coord_t y, const uint8_t *bitma
 // BOTH buffers (grayscale and mask) must be RAM-resident, no mix-and-
 // match.  Specifically for 8-bit display devices such as IS31FL3731;
 // no color reduction/expansion is performed.
-void Adafruit_GFX::drawGrayscaleImage(coord_t x, coord_t y, const uint8_t *bitmap, const uint8_t *mask, coord_t w, coord_t h) {
+void Canvas::drawGrayscaleImage(coord_t x, coord_t y, const uint8_t *bitmap, const uint8_t *mask, coord_t w, coord_t h) {
 	int16_t bw = (w + 7) / 8; // Bitmask scanline pad = whole byte
 	uint8_t byte = 0;
 	for (int16_t j = 0; j < h; j++, y++) {
@@ -388,7 +397,7 @@ void Adafruit_GFX::drawGrayscaleImage(coord_t x, coord_t y, const uint8_t *bitma
 
 // Draw a RAM-resident 16-bit image (RGB 5/6/5) at the specified (x,y)
 // position.  For 16-bit display devices; no color reduction performed.
-void Adafruit_GFX::drawRGBImage(coord_t x, coord_t y, const uint32_t *bitmap, coord_t w, coord_t h) {
+void Canvas::drawRGBImage(coord_t x, coord_t y, const uint32_t *bitmap, coord_t w, coord_t h) {
 	for (int16_t j = 0; j < h; j++, y++) {
 		for (int16_t i = 0; i < w; i++) {
 			writePixel(x + i, y, bitmap[j * w + i]);
@@ -400,7 +409,7 @@ void Adafruit_GFX::drawRGBImage(coord_t x, coord_t y, const uint32_t *bitmap, co
 // (set bits = opaque, unset bits = clear) at the specified (x,y) pos.
 // BOTH buffers (color and mask) must be RAM-resident, no mix-and-match.
 // For 16-bit display devices; no color reduction performed.
-void Adafruit_GFX::drawRGBImage(coord_t x, coord_t y, const uint32_t *bitmap, const uint8_t *mask, coord_t w, coord_t h) {
+void Canvas::drawRGBImage(coord_t x, coord_t y, const uint32_t *bitmap, const uint8_t *mask, coord_t w, coord_t h) {
 	int16_t bw = (w + 7) / 8; // Bitmask scanline pad = whole byte
 	uint8_t byte = 0;
 	for (int16_t j = 0; j < h; j++, y++) {
@@ -419,7 +428,8 @@ void Adafruit_GFX::drawRGBImage(coord_t x, coord_t y, const uint32_t *bitmap, co
 // TEXT- AND CHARACTER-HANDLING FUNCTIONS ----------------------------------
 
 // Draw a character
-void Adafruit_GFX::drawChar(coord_t x, coord_t y, unsigned char c, coord_t size) {
+void Canvas::drawChar(coord_t x, coord_t y, unsigned char c, coord_t size) {
+	ColorSafe tmp(*this);
 
 	bool opaque = (colors.text != colors.textbg);
 
@@ -435,23 +445,24 @@ void Adafruit_GFX::drawChar(coord_t x, coord_t y, unsigned char c, coord_t size)
 			uint8_t line = font[c * 5 + i];
 			for (int8_t j = 0; j < 8; j++, line >>= 1) {
 				bool draw = line & 1;
-				uint16_t c = draw ? textcolor : textbgcolor;
+				colors.draw = draw ? colors.text : colors.textbg;
 				if (opaque || draw) {
 					if (size == 1) {
-						drawPixel(x + i, y + j, c);
+						drawPixel(x + i, y + j);
 					} else {
 						int16_t xp = x + i * size;
 						int16_t yp = y + i * size;
-						fillRect(xp, yp, xp + size - 1, yp + size - 1, c);
+						fillRect(xp, yp, xp + size - 1, yp + size - 1);
 					}
 				}
 			}
 		}
 		if (opaque) { // If opaque, draw vertical line for last column
+			colors.draw = colors.textbg;
 			if (size == 1) {
-				drawLine(x + 5, y, x + 5, y + 8, bg);
+				drawLine(x + 5, y, x + 5, y + 8);
 			} else {
-				fillRect(x + 5 * size, y, x + 6 * size, y + 8 * size, bg);
+				fillRect(x + 5 * size, y, x + 6 * size, y + 8 * size);
 			}
 		}
 
@@ -488,6 +499,8 @@ void Adafruit_GFX::drawChar(coord_t x, coord_t y, unsigned char c, coord_t size)
 		// displays supporting setAddrWindow() and pushColors()), but haven't
 		// implemented this yet.
 
+		colors.draw = colors.text;
+
 		for (yy = ys; yy < ye; yy++) {
 			for (xx = xs; xx < xe; xx++) {
 				if (!(bit++ & 7)) {
@@ -495,9 +508,9 @@ void Adafruit_GFX::drawChar(coord_t x, coord_t y, unsigned char c, coord_t size)
 				}
 				if (bits & 0x80) {
 					if (size == 1) {
-						drawPixel(x + xx, y + yy, color);
+						drawPixel(x + xx, y + yy);
 					} else {
-						fillRect(x + xx * size, y + yy * size, x + (xx + 1) * size - 1, y + (yy + 1) * size - 1, color);
+						fillRect(x + xx * size, y + yy * size, x + (xx + 1) * size - 1, y + (yy + 1) * size - 1);
 					}
 				}
 				bits <<= 1;
@@ -507,13 +520,13 @@ void Adafruit_GFX::drawChar(coord_t x, coord_t y, unsigned char c, coord_t size)
 	} // End classic vs custom font
 }
 
-void Adafruit_GFX::write(const char *data, size_t len) {
+void Canvas::write(const char *data, size_t len) {
 	for (size_t i = 0; i < len; i++) {
-		this->Adafruit_GFX::write(data[i]);
+		this->Canvas::write(data[i]);
 	}
 }
 
-void Adafruit_GFX::write(char c2) {
+void Canvas::write(char c2) {
 	uint8_t c = (uint8_t) c2;
 	if (!gfxFont) { // 'Classic' built-in font
 
@@ -558,45 +571,45 @@ void Adafruit_GFX::write(char c2) {
 	}
 }
 
-void Adafruit_GFX::setCursor(coord_t x, coord_t y) {
+void Canvas::setCursor(coord_t x, coord_t y) {
 	cursor_x = x;
 	cursor_y = y;
 }
 
-Adafruit_GFX::coord_t Adafruit_GFX::getCursorX(void) const {
+Canvas::coord_t Canvas::getCursorX(void) const {
 	return cursor_x;
 }
 
-Adafruit_GFX::coord_t Adafruit_GFX::getCursorY(void) const {
+Canvas::coord_t Canvas::getCursorY(void) const {
 	return cursor_y;
 }
 
-void Adafruit_GFX::setTextSize(coord_t s) {
+void Canvas::setTextSize(coord_t s) {
 	textheight = (s > 0) ? s : 1;
 }
 
-void Adafruit_GFX::setBgColor(color_t b) {
+void Canvas::setBgColor(color_t b) {
 	colors.drawbg = translateColor(b);
 }
 
-void Adafruit_GFX::setDrawColor(color_t c) {
+void Canvas::setDrawColor(color_t c) {
 	colors.draw = translateColor(c);
 }
 
-void Adafruit_GFX::setTextColor(color_t c, color_t b) {
+void Canvas::setTextColor(color_t c, color_t b) {
 	colors.text = translateColor(c);
 	colors.textbg = translateColor(b);
 }
 
-void Adafruit_GFX::setTextWrap(bool w) {
+void Canvas::setTextWrap(bool w) {
 	wrap = w;
 }
 
-uint8_t Adafruit_GFX::getRotation(void) const {
+uint8_t Canvas::getRotation(void) const {
 	return rotation;
 }
 
-void Adafruit_GFX::setRotation(uint8_t x) {
+void Canvas::setRotation(uint8_t x) {
 	rotation = (x & 3);
 	switch (rotation) {
 	case 0:
@@ -646,7 +659,7 @@ void Adafruit_GFX::setRotation(uint8_t x) {
 	}
 }
 
-void Adafruit_GFX::setFont(const GFXfont *f) {
+void Canvas::setFont(const GFXfont *f) {
 	if (f) {            // Font struct pointer passed in?
 		if (!gfxFont) { // And no current font struct?
 			// Switching from classic to new font behavior.
@@ -663,7 +676,7 @@ void Adafruit_GFX::setFont(const GFXfont *f) {
 
 // Broke this out as it's used by both the PROGMEM- and RAM-resident
 // getTextBounds() functions.
-void Adafruit_GFX::charBounds(char c, coord_t *x, coord_t *y, coord_t *minx, coord_t *miny, coord_t *maxx, coord_t *maxy) {
+void Canvas::charBounds(char c, coord_t *x, coord_t *y, coord_t *minx, coord_t *miny, coord_t *maxx, coord_t *maxy) {
 
 	if (gfxFont) {
 
@@ -720,7 +733,7 @@ void Adafruit_GFX::charBounds(char c, coord_t *x, coord_t *y, coord_t *minx, coo
 }
 
 // Pass string and a cursor position, returns UL corner and W,H.
-void Adafruit_GFX::getTextBounds(char *str, coord_t x, coord_t y, coord_t *x1, coord_t *y1, coord_t *w, coord_t *h) {
+void Canvas::getTextBounds(char *str, coord_t x, coord_t y, coord_t *x1, coord_t *y1, coord_t *w, coord_t *h) {
 	uint8_t c; // Current character
 
 	*x1 = x;
@@ -743,11 +756,11 @@ void Adafruit_GFX::getTextBounds(char *str, coord_t x, coord_t y, coord_t *x1, c
 }
 
 // Return the size of the display (per current rotation)
-Adafruit_GFX::coord_t Adafruit_GFX::getWidth(void) const {
+Canvas::coord_t Canvas::getWidth(void) const {
 	return _width;
 }
 
-Adafruit_GFX::coord_t Adafruit_GFX::getHeight(void) const {
+Canvas::coord_t Canvas::getHeight(void) const {
 	return _height;
 }
 
@@ -758,15 +771,15 @@ Adafruit_GFX_Button::Adafruit_GFX_Button(void) {
 }
 
 // Classic initButton() function: pass center & size
-void Adafruit_GFX_Button::initButton(Adafruit_GFX *gfx, int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t outline, uint16_t fill, uint16_t textcolor,
-		char *label, uint8_t textsize) {
+void Adafruit_GFX_Button::initButton(Canvas *gfx, int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t outline, uint16_t fill, uint16_t textcolor,
+		std::string label, uint8_t textsize) {
 	// Tweak arguments and pass to the newer initButtonUL() function...
 	initButtonUL(gfx, x - (w / 2), y - (h / 2), w, h, outline, fill, textcolor, label, textsize);
 }
 
 // Newer function instead accepts upper-left corner & size
-void Adafruit_GFX_Button::initButtonUL(Adafruit_GFX *gfx, int16_t x1, int16_t y1, uint16_t w, uint16_t h, uint16_t outline, uint16_t fill, uint16_t textcolor,
-		char *label, uint8_t textsize) {
+void Adafruit_GFX_Button::initButtonUL(Canvas *gfx, int16_t x1, int16_t y1, uint16_t w, uint16_t h, uint16_t outline, uint16_t fill, uint16_t textcolor,
+		std::string label, uint8_t textsize) {
 	_x1 = x1;
 	_y1 = y1;
 	_w = w;
@@ -776,10 +789,11 @@ void Adafruit_GFX_Button::initButtonUL(Adafruit_GFX *gfx, int16_t x1, int16_t y1
 	_textcolor = textcolor;
 	_textsize = textsize;
 	_gfx = gfx;
-	strncpy(_label, label, 9);
+	_label = label;
 }
 
 void Adafruit_GFX_Button::drawButton(bool inverted) {
+	Canvas::ColorSafe tmp(*_gfx);
 	uint16_t fill, outline, text;
 
 	if (!inverted) {
@@ -793,10 +807,12 @@ void Adafruit_GFX_Button::drawButton(bool inverted) {
 	}
 
 	uint8_t r = min(_w, _h) / 4; // Corner radius
-	_gfx->fillRoundRect(_x1, _y1, _w, _h, r, fill);
-	_gfx->drawRoundRect(_x1, _y1, _w, _h, r, outline);
+	_gfx->setDrawColor(fill);
+	_gfx->fillRoundRect(_x1, _y1, _w, _h, r);
+	_gfx->setDrawColor(outline);
+	_gfx->drawRoundRect(_x1, _y1, _w, _h, r);
 
-	_gfx->setCursor(_x1 + (_w / 2) - (strlen(_label) * 3 * _textsize), _y1 + (_h / 2) - (4 * _textsize));
+	_gfx->setCursor(_x1 + (_w / 2) - (_label.length() * 3 * _textsize), _y1 + (_h / 2) - (4 * _textsize));
 	_gfx->setTextColor(text, text);
 	_gfx->setTextSize(_textsize);
 	_gfx->print(_label);
@@ -840,202 +856,93 @@ bool Adafruit_GFX_Button::justReleased() {
 // scanline pad).
 // NOT EXTENSIVELY TESTED YET.  MAY CONTAIN WORST BUGS KNOWN TO HUMANKIND.
 
-GFXcanvas1::GFXcanvas1(uint16_t w, uint16_t h) :
-		Adafruit_GFX(w, h) {
+Canvas1bpp::Canvas1bpp(uint16_t w, uint16_t h) :
+		Canvas(w, h) {
 	uint16_t bytes = ((w + 7) / 8) * h;
 	if ((buffer = (uint8_t *) malloc(bytes))) {
 		memset(buffer, 0, bytes);
 	}
 }
 
-GFXcanvas1::~GFXcanvas1(void) {
+Canvas1bpp::~Canvas1bpp(void) {
 	if (buffer)
 		free(buffer);
 }
 
-uint8_t* GFXcanvas1::getBuffer(void) {
+uint8_t* Canvas1bpp::getBuffer(void) {
 	return buffer;
 }
 
-void GFXcanvas1::drawPixel(int16_t x, int16_t y, uint16_t color) {
-	if (buffer) {
-		if ((x < 0) || (y < 0) || (x >= _width) || (y >= _height))
-			return;
-
-		int16_t t;
-		switch (rotation) {
-		case 1:
-			t = x;
-			x = WIDTH - 1 - y;
-			y = t;
-			break;
-		case 2:
-			x = WIDTH - 1 - x;
-			y = HEIGHT - 1 - y;
-			break;
-		case 3:
-			t = x;
-			x = y;
-			y = HEIGHT - 1 - t;
-			break;
-		}
-
-		uint8_t *ptr = buffer + (x / 8) + y * ((WIDTH + 7) / 8);
-		if (color)
-			*ptr |= 0x80 >> (x & 7);
-		else
-			*ptr &= ~(0x80 >> (x & 7));
-	}
+Canvas1bpp::color_t Canvas1bpp::translateColor(color_t color) {
+	color_t x = (color & 0xFF) + ((color >> 8) & 0xFF) + ((color >> 16) & 0xFF);
+	return x < 3 * 128 ? 0 : 1;
 }
 
-void GFXcanvas1::fillScreen(uint16_t color) {
-	if (buffer) {
-		uint16_t bytes = ((WIDTH + 7) / 8) * HEIGHT;
-		memset(buffer, color ? 0xFF : 0x00, bytes);
-	}
+void Canvas1bpp::writePixel(coord_t x, coord_t y, color_t color) {
+	if (x < 0 || y < 0 || x >= WIDTH || y >= HEIGHT)
+		return;
+
+	size_t linelength = (WIDTH + 7) / 8;
+	uint8_t *ptr = buffer + (x / 8) + y * linelength;
+	uint8_t off = x & 7;
+	*ptr = (*ptr & (0x7F7F >> off)) | ((color & 1) << (7 - off));
 }
 
-GFXcanvas8::GFXcanvas8(uint16_t w, uint16_t h) :
-		Adafruit_GFX(w, h) {
+Canvas8bpp::Canvas8bpp(uint16_t w, uint16_t h) :
+		Canvas(w, h) {
 	uint32_t bytes = w * h;
 	if ((buffer = (uint8_t *) malloc(bytes))) {
 		memset(buffer, 0, bytes);
 	}
 }
 
-GFXcanvas8::~GFXcanvas8(void) {
+Canvas8bpp::~Canvas8bpp(void) {
 	if (buffer)
 		free(buffer);
 }
 
-uint8_t* GFXcanvas8::getBuffer(void) {
+uint8_t* Canvas8bpp::getBuffer(void) {
 	return buffer;
 }
 
-void GFXcanvas8::drawPixel(int16_t x, int16_t y, uint16_t color) {
-	if (buffer) {
-		if ((x < 0) || (y < 0) || (x >= _width) || (y >= _height))
-			return;
-
-		int16_t t;
-		switch (rotation) {
-		case 1:
-			t = x;
-			x = WIDTH - 1 - y;
-			y = t;
-			break;
-		case 2:
-			x = WIDTH - 1 - x;
-			y = HEIGHT - 1 - y;
-			break;
-		case 3:
-			t = x;
-			x = y;
-			y = HEIGHT - 1 - t;
-			break;
-		}
-
-		buffer[x + y * WIDTH] = color;
-	}
+Canvas8bpp::color_t Canvas8bpp::translateColor(color_t color) {
+	color_t x = (color & 0xFF) + ((color >> 8) & 0xFF) + ((color >> 16) & 0xFF);
+	return x / 3;
 }
 
-void GFXcanvas8::fillScreen(uint16_t color) {
-	if (buffer) {
-		memset(buffer, color, WIDTH * HEIGHT);
-	}
-}
-
-void GFXcanvas8::writeHLine(int16_t x, int16_t y, int16_t w, uint16_t color) {
-
-	if ((x >= _width) || (y < 0) || (y >= _height))
-		return;
-	int16_t x2 = x + w - 1;
-	if (x2 < 0)
+void Canvas8bpp::writePixel(coord_t x, coord_t y, color_t color) {
+	if (x < 0 || y < 0 || x >= WIDTH || y >= HEIGHT)
 		return;
 
-	// Clip left/right
-	if (x < 0) {
-		x = 0;
-		w = x2 + 1;
-	}
-	if (x2 >= _width)
-		w = _width - x;
-
-	int16_t t;
-	switch (rotation) {
-	case 1:
-		t = x;
-		x = WIDTH - 1 - y;
-		y = t;
-		break;
-	case 2:
-		x = WIDTH - 1 - x;
-		y = HEIGHT - 1 - y;
-		break;
-	case 3:
-		t = x;
-		x = y;
-		y = HEIGHT - 1 - t;
-		break;
-	}
-
-	memset(buffer + y * WIDTH + x, color, w);
+	buffer[x + y * WIDTH] = color;
 }
 
-GFXcanvas16::GFXcanvas16(uint16_t w, uint16_t h) :
-		Adafruit_GFX(w, h) {
+Canvas16bpp::Canvas16bpp(uint16_t w, uint16_t h) :
+		Canvas(w, h) {
 	uint32_t bytes = w * h * 2;
 	if ((buffer = (uint16_t *) malloc(bytes))) {
 		memset(buffer, 0, bytes);
 	}
 }
 
-GFXcanvas16::~GFXcanvas16(void) {
+Canvas16bpp::~Canvas16bpp(void) {
 	if (buffer)
 		free(buffer);
 }
 
-uint16_t* GFXcanvas16::getBuffer(void) {
+uint16_t* Canvas16bpp::getBuffer(void) {
 	return buffer;
 }
 
-void GFXcanvas16::drawPixel(int16_t x, int16_t y, uint16_t color) {
-	if (buffer) {
-		if ((x < 0) || (y < 0) || (x >= _width) || (y >= _height))
-			return;
-
-		int16_t t;
-		switch (rotation) {
-		case 1:
-			t = x;
-			x = WIDTH - 1 - y;
-			y = t;
-			break;
-		case 2:
-			x = WIDTH - 1 - x;
-			y = HEIGHT - 1 - y;
-			break;
-		case 3:
-			t = x;
-			x = y;
-			y = HEIGHT - 1 - t;
-			break;
-		}
-
-		buffer[x + y * WIDTH] = color;
-	}
+Canvas16bpp::color_t Canvas16bpp::translateColor(color_t color) {
+	return ((color & 0xF8) >> 3)
+			| ((color & 0xFC00) >> 5)
+			| ((color & 0xF80000) >> 8);
 }
 
-void GFXcanvas16::fillScreen(uint16_t color) {
-	if (buffer) {
-		uint8_t hi = color >> 8, lo = color & 0xFF;
-		if (hi == lo) {
-			memset(buffer, lo, WIDTH * HEIGHT * 2);
-		} else {
-			uint32_t i, pixels = WIDTH * HEIGHT;
-			for (i = 0; i < pixels; i++)
-				buffer[i] = color;
-		}
-	}
-}
+void Canvas16bpp::writePixel(coord_t x, coord_t y, color_t color) {
+	if (x < 0 || y < 0 || x >= WIDTH || y >= HEIGHT)
+		return;
 
+	buffer[x + y * WIDTH] = color;
+}

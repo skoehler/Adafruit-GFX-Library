@@ -8,7 +8,7 @@
 #include "Print.h"
 #include "gfxfont.h"
 
-class Adafruit_GFX: public Print {
+class Canvas: public Print {
 public:
 	typedef int32_t coord_t;
 	typedef uint32_t color_t;
@@ -20,6 +20,27 @@ public:
 	static const color_t COLOR_BLUE  = 0x0000FF;
 
 private:
+	GFXfont *gfxFont;
+	uint8_t rotation;
+	int8_t mrot[4];
+	coord_t vtrans[2];
+	coord_t _width;
+	coord_t _height;
+
+	struct colors_t {
+		color_t draw;
+		color_t drawbg;
+		color_t text;
+		color_t textbg;
+	};
+
+	colors_t colors;
+
+	coord_t cursor_x;
+	coord_t cursor_y;
+	coord_t textheight;
+	bool wrap;
+
 	void drawChar(coord_t x, coord_t y, unsigned char c, coord_t size);
 
 	coord_t dirX(coord_t x, coord_t y) {
@@ -55,8 +76,22 @@ protected:
 	void fillCircleHelper(coord_t x0, coord_t y0, coord_t r, coord_t deltaX, coord_t deltaY);
 
 public:
-	Adafruit_GFX(coord_t w, coord_t h); // Constructor
-	virtual ~Adafruit_GFX();
+	class ColorSafe {
+	private:
+		colors_t colors;
+		Canvas &ref;
+	public:
+		ColorSafe(Canvas &ref) : colors(ref.colors), ref(ref) {
+			//nothing
+		}
+		~ColorSafe() {
+			ref.colors = colors;
+		}
+	};
+
+
+	Canvas(coord_t w, coord_t h); // Constructor
+	virtual ~Canvas();
 
 	void setRotation(uint8_t r);
 	void setCursor(coord_t x, coord_t y);
@@ -97,28 +132,7 @@ public:
 	void drawRGBImage(coord_t x, coord_t y, const uint32_t *bitmap, const uint8_t *mask, coord_t w, coord_t h);
 
 protected:
-	GFXfont *gfxFont;
 	const coord_t WIDTH, HEIGHT; // This is the 'raw' display w/h - never changes
-	uint8_t rotation;
-	int8_t mrot[4];
-	coord_t vtrans[2];
-	coord_t _width;
-	coord_t _height;
-
-	struct colors_t {
-		color_t draw;
-		color_t drawbg;
-		color_t text;
-		color_t textbg;
-	};
-
-	colors_t colors;
-	std::vector<colors_t> colorstack;
-
-	coord_t cursor_x;
-	coord_t cursor_y;
-	coord_t textheight;
-	bool wrap;
 };
 
 class Adafruit_GFX_Button {
@@ -126,10 +140,12 @@ class Adafruit_GFX_Button {
 public:
 	Adafruit_GFX_Button(void);
 	// "Classic" initButton() uses center & size
-	void initButton(Adafruit_GFX *gfx, int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t outline, uint16_t fill, uint16_t textcolor, char *label,
+	void initButton(Canvas *gfx, int16_t x, int16_t y, uint16_t w, uint16_t h,
+			uint16_t outline, uint16_t fill, uint16_t textcolor, std::string label,
 			uint8_t textsize);
 	// New/alt initButton() uses upper-left corner & size
-	void initButtonUL(Adafruit_GFX *gfx, int16_t x1, int16_t y1, uint16_t w, uint16_t h, uint16_t outline, uint16_t fill, uint16_t textcolor, char *label,
+	void initButtonUL(Canvas *gfx, int16_t x1, int16_t y1, uint16_t w, uint16_t h,
+			uint16_t outline, uint16_t fill, uint16_t textcolor, std::string label,
 			uint8_t textsize);
 	void drawButton(bool inverted = false);
 	bool contains(int16_t x, int16_t y);
@@ -140,43 +156,60 @@ public:
 	bool justReleased();
 
 private:
-	Adafruit_GFX *_gfx;
+	Canvas *_gfx;
 	int16_t _x1, _y1; // Coordinates of top-left corner
 	uint16_t _w, _h;
 	uint8_t _textsize;
 	uint16_t _outlinecolor, _fillcolor, _textcolor;
-	char _label[10];
+	std::string _label;
 
 	bool currstate, laststate;
 };
 
-class GFXcanvas1: public Adafruit_GFX {
+class Canvas1bpp: public Canvas {
 public:
-	GFXcanvas1(uint16_t w, uint16_t h);
-	~GFXcanvas1(void);
-	void drawPixel(int16_t x, int16_t y, uint16_t color), fillScreen(uint16_t color);
+	Canvas1bpp(uint16_t w, uint16_t h);
+	~Canvas1bpp(void);
 	uint8_t *getBuffer(void);
+protected:
+	virtual color_t translateColor(color_t color);
+	virtual void writePixel(coord_t x, coord_t y, color_t color);
 private:
 	uint8_t *buffer;
 };
 
-class GFXcanvas8: public Adafruit_GFX {
+class Canvas4bpp: public Canvas {
 public:
-	GFXcanvas8(uint16_t w, uint16_t h);
-	~GFXcanvas8(void);
-	void drawPixel(int16_t x, int16_t y, uint16_t color), fillScreen(uint16_t color), writeHLine(int16_t x, int16_t y, int16_t w, uint16_t color);
-
+	Canvas4bpp(uint16_t w, uint16_t h);
+	~Canvas4bpp(void);
 	uint8_t *getBuffer(void);
+protected:
+	virtual color_t translateColor(color_t color);
+	virtual void writePixel(coord_t x, coord_t y, color_t color);
 private:
 	uint8_t *buffer;
 };
 
-class GFXcanvas16: public Adafruit_GFX {
+class Canvas8bpp: public Canvas {
 public:
-	GFXcanvas16(uint16_t w, uint16_t h);
-	~GFXcanvas16(void);
-	void drawPixel(int16_t x, int16_t y, uint16_t color), fillScreen(uint16_t color);
+	Canvas8bpp(uint16_t w, uint16_t h);
+	~Canvas8bpp(void);
+	uint8_t *getBuffer(void);
+protected:
+	virtual color_t translateColor(color_t color);
+	virtual void writePixel(coord_t x, coord_t y, color_t color);
+private:
+	uint8_t *buffer;
+};
+
+class Canvas16bpp: public Canvas {
+public:
+	Canvas16bpp(uint16_t w, uint16_t h);
+	~Canvas16bpp(void);
 	uint16_t *getBuffer(void);
+protected:
+	virtual color_t translateColor(color_t color);
+	virtual void writePixel(coord_t x, coord_t y, color_t color);
 private:
 	uint16_t *buffer;
 };

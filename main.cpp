@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <mraa.h>
 
-#include "Adafruit_GFX.h"
+#include "Canvas.h"
 
 #define US_OFF  1
 #define US_ON   0
@@ -336,7 +336,7 @@ int main(void) {
 	initWindow(0, 127, 0, 127);
 	setDC(1); //set D/C# pin high
 
-	GFXcanvas1 canvas(128, 128);
+	Canvas1bpp canvas(128, 128);
 	char buf[1024];
 
 	std::thread t_us(runUS);
@@ -345,7 +345,7 @@ int main(void) {
 	double accel[3];
 
 	while (1) {
-		canvas.fillRect(0, 0, 128, 128, 0);
+		canvas.clearScreen();
 		canvas.setCursor(0, 0);
 
 		up = !mraa_gpio_read(bt_up);
