@@ -151,7 +151,6 @@ uint32_t OLEDDisplay::getFrameCounter() {
 
 void OLEDDisplay::flush() {
 	uint8_t freeIndex = 1 - cmdBufIndex;
-	// skip command and line number
 	uint8_t *dst = cmdBuf[freeIndex].data();
 	uint8_t *src = this->getBuffer();
 	std::memcpy(dst, src, cmdBuf[freeIndex].size());
