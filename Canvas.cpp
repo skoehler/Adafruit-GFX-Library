@@ -61,6 +61,9 @@ Canvas::Canvas(coord_t w, coord_t h) :
 	wrap = true;
 	gfxFont = NULL;
 	setRotation(0);
+}
+
+void Canvas::initColors() {
 	setBgColor(COLOR_BLACK);
 	setDrawColor(COLOR_WHITE);
 	setTextColor(COLOR_WHITE);
@@ -858,15 +861,14 @@ bool Adafruit_GFX_Button::justReleased() {
 
 Canvas1bpp::Canvas1bpp(uint16_t w, uint16_t h) :
 		Canvas(w, h) {
-	uint16_t bytes = ((w + 7) / 8) * h;
-	if ((buffer = (uint8_t *) malloc(bytes))) {
-		memset(buffer, 0, bytes);
-	}
+	size_t linelength = (WIDTH + 7) / 8;
+	uint16_t bytes = linelength * h;
+	buffer = new uint8_t[bytes];
+	initColors();
 }
 
 Canvas1bpp::~Canvas1bpp(void) {
-	if (buffer)
-		free(buffer);
+	delete buffer;
 }
 
 uint8_t* Canvas1bpp::getBuffer(void) {
@@ -888,17 +890,46 @@ void Canvas1bpp::writePixel(coord_t x, coord_t y, color_t color) {
 	*ptr = (*ptr & (0x7F7F >> off)) | ((color & 1) << (7 - off));
 }
 
+Canvas4bpp::Canvas4bpp(uint16_t w, uint16_t h) :
+		Canvas(w, h) {
+	size_t linelength = (WIDTH + 1) / 2;
+	uint16_t bytes = linelength * h;
+	buffer = new uint8_t[bytes];
+	initColors();
+}
+
+Canvas4bpp::~Canvas4bpp(void) {
+	delete buffer;
+}
+
+uint8_t* Canvas4bpp::getBuffer(void) {
+	return buffer;
+}
+
+Canvas4bpp::color_t Canvas4bpp::translateColor(color_t color) {
+	color_t x = (color & 0xFF) + ((color >> 8) & 0xFF) + ((color >> 16) & 0xFF);
+	return x / 3;
+}
+
+void Canvas4bpp::writePixel(coord_t x, coord_t y, color_t color) {
+	if (x < 0 || y < 0 || x >= WIDTH || y >= HEIGHT)
+		return;
+
+	size_t linelength = (WIDTH + 1) / 2;
+	uint8_t *ptr = buffer + (x / 2) + y * linelength;
+	uint8_t off = (x & 1) << 2;
+	*ptr = (*ptr & (0xF0F >> off)) | ((color & 0xF) << (4 - off));
+}
+
 Canvas8bpp::Canvas8bpp(uint16_t w, uint16_t h) :
 		Canvas(w, h) {
 	uint32_t bytes = w * h;
-	if ((buffer = (uint8_t *) malloc(bytes))) {
-		memset(buffer, 0, bytes);
-	}
+	buffer = new uint8_t[bytes];
+	initColors();
 }
 
 Canvas8bpp::~Canvas8bpp(void) {
-	if (buffer)
-		free(buffer);
+	delete buffer;
 }
 
 uint8_t* Canvas8bpp::getBuffer(void) {
@@ -919,15 +950,13 @@ void Canvas8bpp::writePixel(coord_t x, coord_t y, color_t color) {
 
 Canvas16bpp::Canvas16bpp(uint16_t w, uint16_t h) :
 		Canvas(w, h) {
-	uint32_t bytes = w * h * 2;
-	if ((buffer = (uint16_t *) malloc(bytes))) {
-		memset(buffer, 0, bytes);
-	}
+	uint32_t bytes = w * h;
+	buffer = new uint16_t[bytes];
+	initColors();
 }
 
 Canvas16bpp::~Canvas16bpp(void) {
-	if (buffer)
-		free(buffer);
+	delete buffer;
 }
 
 uint16_t* Canvas16bpp::getBuffer(void) {

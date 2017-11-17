@@ -55,11 +55,10 @@ void runUS() {
 		usleep(10);
 		mraa_gpio_write(us_trig, US_OFF);
 
-		double start = 0, stop = 0;
-		while (mraa_gpio_read(us_echo) == US_LOW)
-			start = getTime();
-		while (mraa_gpio_read(us_echo) == US_HIGH)
-			stop = getTime();
+		while (mraa_gpio_read(us_echo) == US_LOW) ;
+		double start = getTime();
+		while (mraa_gpio_read(us_echo) == US_HIGH) ;
+		double stop = getTime();
 
 		double dist = (stop - start) * 17150;
 		us_dist.store(dist);
