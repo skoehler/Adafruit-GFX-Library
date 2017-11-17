@@ -65,99 +65,6 @@ void runUS() {
 	}
 }
 
-///*********************************************************************************
-// Global variables
-// *********************************************************************************/
-//uint8_t disp_buf[20]; //SPI command buffer
-//uint8_t disp_data[128 * 128 / 2]; //SPI data buffer
-//const uint8_t disp_lookup[4] = { 0x0, 0xF, 0xF0, 0xFF }; //lookup table
-//
-//mraa_spi_context disp_spi;
-//mraa_gpio_context disp_dc;
-//mraa_gpio_context disp_rst;
-//
-///*********************************************************************************
-// Function name: initW128128
-// Description: Initialization of the display
-// *********************************************************************************/
-//
-//void setReset(int val) {
-//	mraa_result_t r;
-//	r = mraa_gpio_write(disp_rst, val);
-//	debug("setReset", r);
-//}
-//
-//void setDC(int val) {
-//	mraa_result_t r;
-//	r = mraa_gpio_write(disp_dc, val);
-//	debug("setDC", r);
-//}
-//
-//static inline void waitforemptybuffer() {
-//	//TODO
-//}
-//
-//static inline void ms_delay(int ms) {
-//	usleep(ms * 1000);
-//}
-//
-//static inline void R_RSPI0_Send(uint8_t *buf, size_t len) {
-////	mraa_result_t r;
-//	mraa_spi_transfer_buf(disp_spi, buf, NULL, len);
-////	debug("SPI send", r);
-//}
-//
-//void initW128128(void) {
-//	uint16_t i = 0;
-//	setReset(0); //Reset pin low
-//	ms_delay(100); //100ms delay
-//	setReset(1); //Reset pin high
-//	ms_delay(100); //100ms delay
-//	disp_buf[i++] = 0xA4; //set normal display mode
-//	disp_buf[i++] = 0x81;
-//	disp_buf[i++] = 0x7F; //Set contrast to 0x7F (default)
-//	disp_buf[i++] = 0xB3;
-//	disp_buf[i++] = 0x40; //clock divider/oscillator frequency
-//	disp_buf[i++] = 0xAF; //Display on
-//	disp_buf[i++] = 0xA0; //set memory addressing mode ...
-//	disp_buf[i++] = 0x51; //... to horizontal address increment
-//						  //..enable column address remap
-//						  //...enable COM remap
-//						  //...enable COM split odd even
-//	disp_buf[i++] = 0xA1;
-//	disp_buf[i++] = 0x00; //set display start line to 0
-//	waitforemptybuffer(); //Waits until SPI buffer is empty
-//	setDC(0); //D/C# pin low
-//	R_RSPI0_Send(disp_buf, i); //send initialization buffer via SPI
-//}
-//
-///*********************************************************************************
-// Function name: initWindow
-// Description: Initialization of the window in horizontal addressing mode
-// *********************************************************************************/
-//void initWindow(uint8_t startcol, uint8_t stopcol, uint8_t startrow,
-//		uint8_t stoprow) {
-//	uint16_t i = 0;
-//	disp_buf[i++] = 0x15; //set column address
-//	disp_buf[i++] = startcol; //start address
-//	disp_buf[i++] = stopcol; //end address
-//	disp_buf[i++] = 0x75; //set page address
-//	disp_buf[i++] = startrow; //start page
-//	disp_buf[i++] = stoprow; //stop page
-//	waitforemptybuffer(); //waits until SPI buffer is empty
-//	setDC(0); //set D/C# pin low
-//	R_RSPI0_Send(disp_buf, i); //send data buffer via SPI
-//}
-///*********************************************************************************
-// Function name: sendDataW128128
-// Description: Sends data to the display (Initialization of the window before sending data to
-// the display -> initWindow()
-// Display controller provides 4Bit grayscale -> function only use monochrome data
-// *********************************************************************************/
-//void sendDataW128128(uint8_t *tx_buf, uint16_t tx_num) {
-//	waitforemptybuffer(); //waits until SPI buffer is empty
-//	R_RSPI0_Send(tx_buf, tx_num); //send data buffer via SPI
-//}
 
 #define ADDR_MPU 0x68
 #define ADDR_BME 0x77
@@ -279,8 +186,6 @@ double compTemp(int32_t adc_T) {
 #define BT_OFF "O"
 
 int main(void) {
-	mraa_result_t r;
-
 	mraa_gpio_context led1 = gpio_init(33, MRAA_GPIO_OUT);
 	mraa_gpio_context led2 = gpio_init(35, MRAA_GPIO_OUT);
 	mraa_gpio_context led3 = gpio_init(37, MRAA_GPIO_OUT);
