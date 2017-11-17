@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <mraa.h>
 
-#include "OLEDDisplay.h"
+#include "../OLEDDisplay.h"
 
 #define US_OFF  1
 #define US_ON   0

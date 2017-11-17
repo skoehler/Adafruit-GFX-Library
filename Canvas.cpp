@@ -334,7 +334,7 @@ void Canvas::fillRoundRect(coord_t x0, coord_t y0, coord_t x1, coord_t y1, coord
 // Draw a RAM-resident 1-bit image at the specified (x,y) position,
 // using the specified foreground color (unset bits are transparent).
 void Canvas::drawBitmap(coord_t x, coord_t y, const uint8_t *bitmap, coord_t w, coord_t h) {
-
+	//TODO draw all pixels
 	int16_t byteWidth = (w + 7) / 8; // Bitmap scanline pad = whole byte
 	uint8_t byte = 0;
 
@@ -354,7 +354,7 @@ void Canvas::drawBitmap(coord_t x, coord_t y, const uint8_t *bitmap, coord_t w, 
 // using the specified foreground (for set bits) and background (unset
 // bits) colors.
 void Canvas::drawBitmap(coord_t x, coord_t y, const uint8_t *bitmap, const uint8_t *mask, coord_t w, coord_t h) {
-
+	//TODO use mask
 	int16_t byteWidth = (w + 7) / 8; // Bitmap scanline pad = whole byte
 	uint8_t byte = 0;
 
@@ -386,6 +386,7 @@ void Canvas::drawGrayscaleImage(coord_t x, coord_t y, const uint8_t *bitmap, coo
 // match.  Specifically for 8-bit display devices such as IS31FL3731;
 // no color reduction/expansion is performed.
 void Canvas::drawGrayscaleImage(coord_t x, coord_t y, const uint8_t *bitmap, const uint8_t *mask, coord_t w, coord_t h) {
+	//TODO draw all pixels
 	int16_t bw = (w + 7) / 8; // Bitmask scanline pad = whole byte
 	uint8_t byte = 0;
 	for (int16_t j = 0; j < h; j++, y++) {
@@ -416,6 +417,7 @@ void Canvas::drawRGBImage(coord_t x, coord_t y, const uint32_t *bitmap, coord_t 
 // BOTH buffers (color and mask) must be RAM-resident, no mix-and-match.
 // For 16-bit display devices; no color reduction performed.
 void Canvas::drawRGBImage(coord_t x, coord_t y, const uint32_t *bitmap, const uint8_t *mask, coord_t w, coord_t h) {
+	//TODO use mask
 	int16_t bw = (w + 7) / 8; // Bitmask scanline pad = whole byte
 	uint8_t byte = 0;
 	for (int16_t j = 0; j < h; j++, y++) {
