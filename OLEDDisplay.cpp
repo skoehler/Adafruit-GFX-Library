@@ -33,8 +33,8 @@ OLEDDisplay::OLEDDisplay(coord_t width, coord_t height)
 	//GPIO Init
 	mraa_dir_retry(rst, mraa::DIR_OUT);
 	mraa_dir_retry(dc, mraa::DIR_OUT);
-	rst.write(0);
-	dc.write(0);
+	mR(rst.write(0));
+	mR(dc.write(0));
 
 	// Set SPI clock to 32MHz
 	mR(spi.mode(mraa::SPI_MODE0));
@@ -62,9 +62,9 @@ void OLEDDisplay::enable() {
 	if (refreshEnabled)
 		return;
 
-	rst.write(0); //Reset pin low
+	mR(rst.write(0)); //Reset pin low
 	std::this_thread::sleep_for(std::chrono::milliseconds(100)); //100ms delay
-	rst.write(1); //Reset pin high
+	mR(rst.write(1)); //Reset pin high
 	std::this_thread::sleep_for(std::chrono::milliseconds(100)); //100ms delay
 	uint8_t cmd1[] = {
 		0xA4, //set normal display mode
@@ -81,8 +81,8 @@ void OLEDDisplay::enable() {
 		0xA1,
 		0x00, //set display start line to 0
 	};
-	dc.write(0); //set D/C# pin low
-	spi.transfer(cmd1, NULL, sizeof(cmd1));
+	mR(dc.write(0)); //set D/C# pin low
+	mR(spi.transfer(cmd1, NULL, sizeof(cmd1)));
 
 	uint8_t cmd2[] = {
 		0x15,     //set column address
@@ -92,14 +92,14 @@ void OLEDDisplay::enable() {
 		0,        //start page
 		HEIGHT-1, //stop page
 	};
-	dc.write(0); //set D/C# pin low
-	spi.transfer(cmd2, NULL, sizeof(cmd2));
+	mR(dc.write(0)); //set D/C# pin low
+	mR(spi.transfer(cmd2, NULL, sizeof(cmd2)));
+
+	mR(dc.write(1)); //set D/C# pin high
 
 	// start display thread
 	refreshEnabled = true;
 	refreshTerminate = false;
-
-	dc.write(1); //set D/C# pin high
 	dispThread = std::thread(&OLEDDisplay::refreshDisplay, this,
 			cmdBuf[0].data(), cmdBuf[1].data(), cmdBuf[1].size());
 }
@@ -110,8 +110,8 @@ void OLEDDisplay::disable() {
 		dispThread.join();
 		refreshEnabled = false;
 	}
-	rst.write(0);
-	dc.write(0);
+	mR(rst.write(0));
+	mR(dc.write(0));
 }
 
 void OLEDDisplay::refreshDisplay(uint8_t *data0, uint8_t *data1, int len) {
