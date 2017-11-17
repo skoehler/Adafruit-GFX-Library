@@ -8,7 +8,8 @@
 using std::chrono::steady_clock;
 using namespace GFX;
 
-void testBasicCommon(OLEDDisplay &lcd, color_t bg, color_t fg) {
+void testBasicCommon(color_t bg, color_t fg) {
+	OLEDDisplay lcd(128, 128);
 	lcd.setBgColor(bg);
 	lcd.setDrawColor(fg);
 	lcd.clearScreen();
@@ -22,15 +23,15 @@ void testBasicCommon(OLEDDisplay &lcd, color_t bg, color_t fg) {
 	lcd.drawLine(10, 10, 56, 56);
 
 	lcd.setCursor(10, 60);
-	lcd.setTextColor(COLOR_WHITE);
+	lcd.setTextColor(fg);
 	lcd.print("Hello World!");
 
 	lcd.setCursor(15, 65);
-	lcd.setTextColor(COLOR_WHITE, COLOR_BLACK);
+	lcd.setTextColor(fg, bg);
 	lcd.print("Hello World!");
 
 	lcd.setCursor(20, 70);
-	lcd.setTextColor(COLOR_WHITE);
+	lcd.setTextColor(fg);
 	lcd.print("Hello World!");
 
 	lcd.flush();
@@ -38,13 +39,11 @@ void testBasicCommon(OLEDDisplay &lcd, color_t bg, color_t fg) {
 }
 
 void testBasic1() {
-	OLEDDisplay lcd(128, 128);
-	testBasicCommon(lcd, COLOR_WHITE, COLOR_BLACK);
+	testBasicCommon(COLOR_WHITE, COLOR_BLACK);
 }
 
 void testBasic2() {
-	OLEDDisplay lcd(128, 128);
-	testBasicCommon(lcd, COLOR_BLACK, COLOR_WHITE);
+	testBasicCommon(COLOR_BLACK, COLOR_WHITE);
 }
 
 void testFPS() {

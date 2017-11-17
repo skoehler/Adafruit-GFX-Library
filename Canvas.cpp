@@ -222,6 +222,11 @@ void Canvas::drawCircleHelper(coord_t x0, coord_t y0, coord_t r, coord_t deltaX,
 	int16_t x = 0;
 	int16_t y = r;
 
+	writePixel(x0 + y + deltaX, y0 + x + deltaY, colors.draw);
+	writePixel(x0 + x + deltaX, y0 - y, colors.draw);
+	writePixel(x0 - x, y0 + y + deltaY, colors.draw);
+	writePixel(x0 - y, y0 - x, colors.draw);
+
 	while (x < y) {
 		if (f >= 0) {
 			y--;
@@ -246,6 +251,7 @@ void Canvas::fillCircle(coord_t x0, coord_t y0, coord_t r) {
 	coord_t rx0 = realX(x0, y0);
 	coord_t ry0 = realY(x0, y0);
 
+	writeHLine(rx0 - r, ry0, rx0 + r, colors.draw);
 	fillCircleHelper(rx0, ry0, r, 0, 0);
 }
 
