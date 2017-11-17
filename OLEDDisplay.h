@@ -14,7 +14,7 @@
 
 namespace GFX {
 
-class OLEDDisplay : Canvas4bpp{
+class OLEDDisplay : public Canvas4bpp{
 private:
 	mraa::Gpio rst; // Reset
 	mraa::Gpio dc; // Data/Command

@@ -36,16 +36,14 @@ OLEDDisplay::OLEDDisplay(coord_t width, coord_t height)
 	rst.write(0);
 	dc.write(0);
 
-	// Set SPI clock to 1MHz
-	// LS013B4DN04: ƒSCLK: Typical 0.5MHz, Max 1.0MHz
-	// LS013B7DH03: ƒSCLK: Typical 1.0MHz, Max 1.1MHz
+	// Set SPI clock to 32MHz
 	mR(spi.mode(mraa::SPI_MODE0));
 	mR(spi.frequency(32 * 1000 * 1000));
 	mR(spi.bitPerWord(8));
 	mR(spi.lsbmode(false));
 
-	coord_t blength = (WIDTH + 1)/2;
-	cmdBuf[0].assign(blength * HEIGHT, 0);
+	coord_t rowsize = (WIDTH + 1)/2;
+	cmdBuf[0].assign(rowsize * HEIGHT, 0);
 	cmdBuf[1] = cmdBuf[0];
 	cmdBufIndex = 0;
 
@@ -131,10 +129,8 @@ void OLEDDisplay::refreshDisplay(uint8_t *data0, uint8_t *data1, int len) {
 		frameCounter++;
 		refreshLock.unlock();
 		std::chrono::steady_clock::time_point t = std::chrono::steady_clock::now();
-		std::this_thread::sleep_for(std::chrono::microseconds(6));
 		//TODO check for error
 		spi.transfer(data, NULL, len);
-		std::this_thread::sleep_for(std::chrono::microseconds(2));
 		refreshCond.notify_all();
 		std::this_thread::sleep_until(t + std::chrono::microseconds(16666));
 		refreshLock.lock();

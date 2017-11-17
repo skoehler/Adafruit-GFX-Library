@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <mraa.h>
 
-#include "Canvas.h"
+#include "OLEDDisplay.h"
 
 #define US_OFF  1
 #define US_ON   0
@@ -65,99 +65,99 @@ void runUS() {
 	}
 }
 
-/*********************************************************************************
- Global variables
- *********************************************************************************/
-uint8_t disp_buf[20]; //SPI command buffer
-uint8_t disp_data[128 * 128 / 2]; //SPI data buffer
-const uint8_t disp_lookup[4] = { 0x0, 0xF, 0xF0, 0xFF }; //lookup table
-
-mraa_spi_context disp_spi;
-mraa_gpio_context disp_dc;
-mraa_gpio_context disp_rst;
-
-/*********************************************************************************
- Function name: initW128128
- Description: Initialization of the display
- *********************************************************************************/
-
-void setReset(int val) {
-	mraa_result_t r;
-	r = mraa_gpio_write(disp_rst, val);
-	debug("setReset", r);
-}
-
-void setDC(int val) {
-	mraa_result_t r;
-	r = mraa_gpio_write(disp_dc, val);
-	debug("setDC", r);
-}
-
-static inline void waitforemptybuffer() {
-	//TODO
-}
-
-static inline void ms_delay(int ms) {
-	usleep(ms * 1000);
-}
-
-static inline void R_RSPI0_Send(uint8_t *buf, size_t len) {
+///*********************************************************************************
+// Global variables
+// *********************************************************************************/
+//uint8_t disp_buf[20]; //SPI command buffer
+//uint8_t disp_data[128 * 128 / 2]; //SPI data buffer
+//const uint8_t disp_lookup[4] = { 0x0, 0xF, 0xF0, 0xFF }; //lookup table
+//
+//mraa_spi_context disp_spi;
+//mraa_gpio_context disp_dc;
+//mraa_gpio_context disp_rst;
+//
+///*********************************************************************************
+// Function name: initW128128
+// Description: Initialization of the display
+// *********************************************************************************/
+//
+//void setReset(int val) {
 //	mraa_result_t r;
-	mraa_spi_transfer_buf(disp_spi, buf, NULL, len);
-//	debug("SPI send", r);
-}
-
-void initW128128(void) {
-	uint16_t i = 0;
-	setReset(0); //Reset pin low
-	ms_delay(100); //100ms delay
-	setReset(1); //Reset pin high
-	ms_delay(100); //100ms delay
-	disp_buf[i++] = 0xA4; //set normal display mode
-	disp_buf[i++] = 0x81;
-	disp_buf[i++] = 0x7F; //Set contrast to 0x7F (default)
-	disp_buf[i++] = 0xB3;
-	disp_buf[i++] = 0x40; //clock divider/oscillator frequency
-	disp_buf[i++] = 0xAF; //Display on
-	disp_buf[i++] = 0xA0; //set memory addressing mode ...
-	disp_buf[i++] = 0x51; //... to horizontal address increment
-						  //..enable column address remap
-						  //...enable COM remap
-						  //...enable COM split odd even
-	disp_buf[i++] = 0xA1;
-	disp_buf[i++] = 0x00; //set display start line to 0
-	waitforemptybuffer(); //Waits until SPI buffer is empty
-	setDC(0); //D/C# pin low
-	R_RSPI0_Send(disp_buf, i); //send initialization buffer via SPI
-}
-
-/*********************************************************************************
- Function name: initWindow
- Description: Initialization of the window in horizontal addressing mode
- *********************************************************************************/
-void initWindow(uint8_t startcol, uint8_t stopcol, uint8_t startrow,
-		uint8_t stoprow) {
-	uint16_t i = 0;
-	disp_buf[i++] = 0x15; //set column address
-	disp_buf[i++] = startcol; //start address
-	disp_buf[i++] = stopcol; //end address
-	disp_buf[i++] = 0x75; //set page address
-	disp_buf[i++] = startrow; //start page
-	disp_buf[i++] = stoprow; //stop page
-	waitforemptybuffer(); //waits until SPI buffer is empty
-	setDC(0); //set D/C# pin low
-	R_RSPI0_Send(disp_buf, i); //send data buffer via SPI
-}
-/*********************************************************************************
- Function name: sendDataW128128
- Description: Sends data to the display (Initialization of the window before sending data to
- the display -> initWindow()
- Display controller provides 4Bit grayscale -> function only use monochrome data
- *********************************************************************************/
-void sendDataW128128(uint8_t *tx_buf, uint16_t tx_num) {
-	waitforemptybuffer(); //waits until SPI buffer is empty
-	R_RSPI0_Send(tx_buf, tx_num); //send data buffer via SPI
-}
+//	r = mraa_gpio_write(disp_rst, val);
+//	debug("setReset", r);
+//}
+//
+//void setDC(int val) {
+//	mraa_result_t r;
+//	r = mraa_gpio_write(disp_dc, val);
+//	debug("setDC", r);
+//}
+//
+//static inline void waitforemptybuffer() {
+//	//TODO
+//}
+//
+//static inline void ms_delay(int ms) {
+//	usleep(ms * 1000);
+//}
+//
+//static inline void R_RSPI0_Send(uint8_t *buf, size_t len) {
+////	mraa_result_t r;
+//	mraa_spi_transfer_buf(disp_spi, buf, NULL, len);
+////	debug("SPI send", r);
+//}
+//
+//void initW128128(void) {
+//	uint16_t i = 0;
+//	setReset(0); //Reset pin low
+//	ms_delay(100); //100ms delay
+//	setReset(1); //Reset pin high
+//	ms_delay(100); //100ms delay
+//	disp_buf[i++] = 0xA4; //set normal display mode
+//	disp_buf[i++] = 0x81;
+//	disp_buf[i++] = 0x7F; //Set contrast to 0x7F (default)
+//	disp_buf[i++] = 0xB3;
+//	disp_buf[i++] = 0x40; //clock divider/oscillator frequency
+//	disp_buf[i++] = 0xAF; //Display on
+//	disp_buf[i++] = 0xA0; //set memory addressing mode ...
+//	disp_buf[i++] = 0x51; //... to horizontal address increment
+//						  //..enable column address remap
+//						  //...enable COM remap
+//						  //...enable COM split odd even
+//	disp_buf[i++] = 0xA1;
+//	disp_buf[i++] = 0x00; //set display start line to 0
+//	waitforemptybuffer(); //Waits until SPI buffer is empty
+//	setDC(0); //D/C# pin low
+//	R_RSPI0_Send(disp_buf, i); //send initialization buffer via SPI
+//}
+//
+///*********************************************************************************
+// Function name: initWindow
+// Description: Initialization of the window in horizontal addressing mode
+// *********************************************************************************/
+//void initWindow(uint8_t startcol, uint8_t stopcol, uint8_t startrow,
+//		uint8_t stoprow) {
+//	uint16_t i = 0;
+//	disp_buf[i++] = 0x15; //set column address
+//	disp_buf[i++] = startcol; //start address
+//	disp_buf[i++] = stopcol; //end address
+//	disp_buf[i++] = 0x75; //set page address
+//	disp_buf[i++] = startrow; //start page
+//	disp_buf[i++] = stoprow; //stop page
+//	waitforemptybuffer(); //waits until SPI buffer is empty
+//	setDC(0); //set D/C# pin low
+//	R_RSPI0_Send(disp_buf, i); //send data buffer via SPI
+//}
+///*********************************************************************************
+// Function name: sendDataW128128
+// Description: Sends data to the display (Initialization of the window before sending data to
+// the display -> initWindow()
+// Display controller provides 4Bit grayscale -> function only use monochrome data
+// *********************************************************************************/
+//void sendDataW128128(uint8_t *tx_buf, uint16_t tx_num) {
+//	waitforemptybuffer(); //waits until SPI buffer is empty
+//	R_RSPI0_Send(tx_buf, tx_num); //send data buffer via SPI
+//}
 
 #define ADDR_MPU 0x68
 #define ADDR_BME 0x77
@@ -289,19 +289,8 @@ int main(void) {
 	mraa_gpio_write(led2, 1);
 	mraa_gpio_write(led3, 1);
 
-	disp_spi = mraa_spi_init_raw(0, 0);
-	debug("initspi", disp_spi);
-	r = mraa_spi_mode(disp_spi, MRAA_SPI_MODE0);
-	debug("mode", r);
-	r = mraa_spi_frequency(disp_spi, 32 * 1000 * 1000);
-	debug("freq", r);
-	r = mraa_spi_bit_per_word(disp_spi, 8);
-	debug("bits", r);
-	r = mraa_spi_lsbmode(disp_spi, 0);
-	debug("lsb", r);
-
-	disp_dc = gpio_init(29, MRAA_GPIO_OUT);
-	disp_rst = gpio_init(15, MRAA_GPIO_OUT);
+	GFX::OLEDDisplay disp(128, 128);
+	disp.enable();
 
 	us_trig = gpio_init(12, MRAA_GPIO_OUT);
 	us_echo = gpio_init(18, MRAA_GPIO_IN);
@@ -318,11 +307,6 @@ int main(void) {
 	mraa_i2c_address(i2c, ADDR_BME);
 	initBME280(i2c);
 
-	initW128128();
-	initWindow(0, 127, 0, 127);
-	setDC(1); //set D/C# pin high
-
-	GFX::Canvas4bpp canvas(128, 128);
 	char buf[1024];
 
 	std::thread t_us(runUS);
@@ -334,8 +318,8 @@ int main(void) {
 //	canvas.setTextColor(Canvas::COLOR_WHITE, Canvas::COLOR_GRAY7);
 
 	while (1) {
-		canvas.clearScreen();
-		canvas.setCursor(0, 0);
+		disp.clearScreen();
+		disp.setCursor(0, 0);
 
 		up = !mraa_gpio_read(bt_up);
 		lt = !mraa_gpio_read(bt_lt);
@@ -368,10 +352,8 @@ int main(void) {
 				"Temp:   %7.2f\370C", up ? BT_ON : BT_OFF, lt ? BT_ON : BT_OFF,
 				ct ? BT_ON : BT_OFF, rt ? BT_ON : BT_OFF, dn ? BT_ON : BT_OFF,
 				us_dist.load(), accel[0], accel[1], accel[2], ctemp);
-		canvas.print(buf);
-
-		sendDataW128128(canvas.getBuffer(), 128 * 128 / 2);
-		usleep(20 * 1000);
+		disp.print(buf);
+		disp.flush();
 	}
 
 }
