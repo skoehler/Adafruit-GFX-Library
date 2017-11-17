@@ -322,7 +322,7 @@ int main(void) {
 	initWindow(0, 127, 0, 127);
 	setDC(1); //set D/C# pin high
 
-	Canvas4bpp canvas(128, 128);
+	GFX::Canvas4bpp canvas(128, 128);
 	char buf[1024];
 
 	std::thread t_us(runUS);
@@ -330,8 +330,8 @@ int main(void) {
 	int up, lt, ct, rt, dn;
 	double accel[3];
 
-	canvas.setBgColor(Canvas::COLOR_GRAY3);
-	canvas.setTextColor(Canvas::COLOR_WHITE, Canvas::COLOR_GRAY7);
+//	canvas.setBgColor(Canvas::COLOR_GRAY3);
+//	canvas.setTextColor(Canvas::COLOR_WHITE, Canvas::COLOR_GRAY7);
 
 	while (1) {
 		canvas.clearScreen();

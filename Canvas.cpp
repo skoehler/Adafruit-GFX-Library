@@ -38,17 +38,20 @@
 
 #include "glcdfont.h"
 
+using namespace GFX;
+
 static inline int16_t min(int16_t a, int16_t b) {
 	return a < b ? a : b;
 }
-static inline void _swap_int16_t(Canvas::coord_t &a, Canvas::coord_t &b) {
-	Canvas::coord_t t = a;
+
+static inline void _swap_int16_t(coord_t &a, coord_t &b) {
+	coord_t t = a;
 	a = b;
 	b = t;
 }
-static inline void _sort_int16_t(Canvas::coord_t &a, Canvas::coord_t &b) {
+static inline void _sort_int16_t(coord_t &a, coord_t &b) {
 	if (a > b) {
-		Canvas::coord_t t = a;
+		coord_t t = a;
 		a = b;
 		b = t;
 	}
@@ -579,11 +582,11 @@ void Canvas::setCursor(coord_t x, coord_t y) {
 	cursor_y = y;
 }
 
-Canvas::coord_t Canvas::getCursorX(void) const {
+coord_t Canvas::getCursorX(void) const {
 	return cursor_x;
 }
 
-Canvas::coord_t Canvas::getCursorY(void) const {
+coord_t Canvas::getCursorY(void) const {
 	return cursor_y;
 }
 
@@ -759,11 +762,11 @@ void Canvas::getTextBounds(char *str, coord_t x, coord_t y, coord_t *x1, coord_t
 }
 
 // Return the size of the display (per current rotation)
-Canvas::coord_t Canvas::getWidth(void) const {
+coord_t Canvas::getWidth(void) const {
 	return _width;
 }
 
-Canvas::coord_t Canvas::getHeight(void) const {
+coord_t Canvas::getHeight(void) const {
 	return _height;
 }
 
@@ -875,7 +878,7 @@ uint8_t* Canvas1bpp::getBuffer(void) {
 	return buffer;
 }
 
-Canvas1bpp::color_t Canvas1bpp::translateColor(color_t color) {
+color_t Canvas1bpp::translateColor(color_t color) {
 	color_t x = (color & 0xFF) + ((color >> 8) & 0xFF) + ((color >> 16) & 0xFF);
 	return x < 3 * 128 ? 0 : 1;
 }
@@ -906,7 +909,7 @@ uint8_t* Canvas4bpp::getBuffer(void) {
 	return buffer;
 }
 
-Canvas4bpp::color_t Canvas4bpp::translateColor(color_t color) {
+color_t Canvas4bpp::translateColor(color_t color) {
 	color_t x = (color & 0xFF) + ((color >> 8) & 0xFF) + ((color >> 16) & 0xFF);
 	return x / 3;
 }
@@ -936,7 +939,7 @@ uint8_t* Canvas8bpp::getBuffer(void) {
 	return buffer;
 }
 
-Canvas8bpp::color_t Canvas8bpp::translateColor(color_t color) {
+color_t Canvas8bpp::translateColor(color_t color) {
 	color_t x = (color & 0xFF) + ((color >> 8) & 0xFF) + ((color >> 16) & 0xFF);
 	return x / 3;
 }
@@ -963,7 +966,7 @@ uint16_t* Canvas16bpp::getBuffer(void) {
 	return buffer;
 }
 
-Canvas16bpp::color_t Canvas16bpp::translateColor(color_t color) {
+color_t Canvas16bpp::translateColor(color_t color) {
 	return ((color & 0xF8) >> 3)
 			| ((color & 0xFC00) >> 5)
 			| ((color & 0xF80000) >> 8);

@@ -8,31 +8,32 @@
 #include "Print.h"
 #include "gfxfont.h"
 
+namespace GFX {
+
+typedef int32_t coord_t;
+typedef uint32_t color_t;
+
+static const color_t COLOR_BLACK = 0x000000;
+static const color_t COLOR_GRAY1 = 0x111111;
+static const color_t COLOR_GRAY2 = 0x222222;
+static const color_t COLOR_GRAY3 = 0x333333;
+static const color_t COLOR_GRAY4 = 0x444444;
+static const color_t COLOR_GRAY5 = 0x555555;
+static const color_t COLOR_GRAY6 = 0x666666;
+static const color_t COLOR_GRAY7 = 0x777777;
+static const color_t COLOR_GRAY8 = 0x888888;
+static const color_t COLOR_GRAY9 = 0x999999;
+static const color_t COLOR_GRAY10 = 0xAAAAAA;
+static const color_t COLOR_GRAY11 = 0xBBBBBB;
+static const color_t COLOR_GRAY12 = 0xCCCCCC;
+static const color_t COLOR_GRAY13 = 0xDDDDDD;
+static const color_t COLOR_GRAY14 = 0xEEEEEE;
+static const color_t COLOR_WHITE = 0xFFFFFF;
+static const color_t COLOR_RED   = 0xFF0000;
+static const color_t COLOR_GREEN = 0x00FF00;
+static const color_t COLOR_BLUE  = 0x0000FF;
+
 class Canvas: public Print {
-public:
-	typedef int32_t coord_t;
-	typedef uint32_t color_t;
-
-	static const color_t COLOR_BLACK = 0x000000;
-	static const color_t COLOR_GRAY1 = 0x111111;
-	static const color_t COLOR_GRAY2 = 0x222222;
-	static const color_t COLOR_GRAY3 = 0x333333;
-	static const color_t COLOR_GRAY4 = 0x444444;
-	static const color_t COLOR_GRAY5 = 0x555555;
-	static const color_t COLOR_GRAY6 = 0x666666;
-	static const color_t COLOR_GRAY7 = 0x777777;
-	static const color_t COLOR_GRAY8 = 0x888888;
-	static const color_t COLOR_GRAY9 = 0x999999;
-	static const color_t COLOR_GRAY10 = 0xAAAAAA;
-	static const color_t COLOR_GRAY11 = 0xBBBBBB;
-	static const color_t COLOR_GRAY12 = 0xCCCCCC;
-	static const color_t COLOR_GRAY13 = 0xDDDDDD;
-	static const color_t COLOR_GRAY14 = 0xEEEEEE;
-	static const color_t COLOR_WHITE = 0xFFFFFF;
-	static const color_t COLOR_RED   = 0xFF0000;
-	static const color_t COLOR_GREEN = 0x00FF00;
-	static const color_t COLOR_BLUE  = 0x0000FF;
-
 private:
 	GFXfont *gfxFont;
 	uint8_t rotation;
@@ -71,6 +72,8 @@ private:
 	}
 
 protected:
+	const coord_t WIDTH, HEIGHT; // This is the 'raw' display w/h - never changes
+
 	virtual void write(char);
 	virtual void write(const char *, size_t);
 	void charBounds(char c, coord_t *x, coord_t *y, coord_t *minx, coord_t *miny, coord_t *maxx, coord_t *maxy);
@@ -147,8 +150,7 @@ public:
 	void drawRGBImage(coord_t x, coord_t y, const uint32_t *bitmap, coord_t w, coord_t h);
 	void drawRGBImage(coord_t x, coord_t y, const uint32_t *bitmap, const uint8_t *mask, coord_t w, coord_t h);
 
-protected:
-	const coord_t WIDTH, HEIGHT; // This is the 'raw' display w/h - never changes
+	void flush();
 };
 
 class Adafruit_GFX_Button {
@@ -229,5 +231,8 @@ protected:
 private:
 	uint16_t *buffer;
 };
+
+
+}
 
 #endif // _ADAFRUIT_GFX_H
