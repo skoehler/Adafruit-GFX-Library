@@ -8,10 +8,11 @@
 using std::chrono::steady_clock;
 using namespace GFX;
 
-void testBasicCommon(Canvas &lcd, color_t bg, color_t fg) {
+void testBasicCommon(OLEDDisplay &lcd, color_t bg, color_t fg) {
 	lcd.setBgColor(bg);
 	lcd.setDrawColor(fg);
 	lcd.clearScreen();
+	lcd.enable();
 
 	lcd.drawRect(10, 40, 30, 50);
 	lcd.drawCircle(20, 20, 10);
@@ -38,13 +39,11 @@ void testBasicCommon(Canvas &lcd, color_t bg, color_t fg) {
 
 void testBasic1() {
 	OLEDDisplay lcd(128, 128);
-	lcd.enable();
 	testBasicCommon(lcd, COLOR_WHITE, COLOR_BLACK);
 }
 
 void testBasic2() {
 	OLEDDisplay lcd(128, 128);
-	lcd.enable();
 	testBasicCommon(lcd, COLOR_BLACK, COLOR_WHITE);
 }
 
