@@ -150,13 +150,15 @@ public:
 	void drawRGBImage(coord_t x, coord_t y, const uint32_t *bitmap, coord_t w, coord_t h);
 	void drawRGBImage(coord_t x, coord_t y, const uint32_t *bitmap, const uint8_t *mask, coord_t w, coord_t h);
 
-	void flush();
+	virtual void flush();
 };
 
-class Adafruit_GFX_Button {
+class Button {
 
 public:
-	Adafruit_GFX_Button(void);
+	Button(void);
+	virtual ~Button();
+
 	// "Classic" initButton() uses center & size
 	void initButton(Canvas *gfx, int16_t x, int16_t y, uint16_t w, uint16_t h,
 			uint16_t outline, uint16_t fill, uint16_t textcolor, std::string label,

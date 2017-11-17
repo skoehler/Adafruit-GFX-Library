@@ -770,21 +770,29 @@ coord_t Canvas::getHeight(void) const {
 	return _height;
 }
 
+void Canvas::flush() {
+	//nothing
+}
+
 /***************************************************************************/
 // code for the GFX button UI element
-Adafruit_GFX_Button::Adafruit_GFX_Button(void) {
+Button::Button(void) {
 	_gfx = 0;
 }
 
+Button::~Button() {
+	//nothing
+}
+
 // Classic initButton() function: pass center & size
-void Adafruit_GFX_Button::initButton(Canvas *gfx, int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t outline, uint16_t fill, uint16_t textcolor,
+void Button::initButton(Canvas *gfx, int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t outline, uint16_t fill, uint16_t textcolor,
 		std::string label, uint8_t textsize) {
 	// Tweak arguments and pass to the newer initButtonUL() function...
 	initButtonUL(gfx, x - (w / 2), y - (h / 2), w, h, outline, fill, textcolor, label, textsize);
 }
 
 // Newer function instead accepts upper-left corner & size
-void Adafruit_GFX_Button::initButtonUL(Canvas *gfx, int16_t x1, int16_t y1, uint16_t w, uint16_t h, uint16_t outline, uint16_t fill, uint16_t textcolor,
+void Button::initButtonUL(Canvas *gfx, int16_t x1, int16_t y1, uint16_t w, uint16_t h, uint16_t outline, uint16_t fill, uint16_t textcolor,
 		std::string label, uint8_t textsize) {
 	_x1 = x1;
 	_y1 = y1;
@@ -798,7 +806,7 @@ void Adafruit_GFX_Button::initButtonUL(Canvas *gfx, int16_t x1, int16_t y1, uint
 	_label = label;
 }
 
-void Adafruit_GFX_Button::drawButton(bool inverted) {
+void Button::drawButton(bool inverted) {
 	Canvas::ColorSafe tmp(*_gfx);
 	uint16_t fill, outline, text;
 
@@ -824,22 +832,22 @@ void Adafruit_GFX_Button::drawButton(bool inverted) {
 	_gfx->print(_label);
 }
 
-bool Adafruit_GFX_Button::contains(int16_t x, int16_t y) {
+bool Button::contains(int16_t x, int16_t y) {
 	return ((x >= _x1) && (x < (_x1 + _w)) && (y >= _y1) && (y < (_y1 + _h)));
 }
 
-void Adafruit_GFX_Button::press(bool p) {
+void Button::press(bool p) {
 	laststate = currstate;
 	currstate = p;
 }
 
-bool Adafruit_GFX_Button::isPressed() {
+bool Button::isPressed() {
 	return currstate;
 }
-bool Adafruit_GFX_Button::justPressed() {
+bool Button::justPressed() {
 	return (currstate && !laststate);
 }
-bool Adafruit_GFX_Button::justReleased() {
+bool Button::justReleased() {
 	return (!currstate && laststate);
 }
 
