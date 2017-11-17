@@ -154,22 +154,9 @@ void initWindow(uint8_t startcol, uint8_t stopcol, uint8_t startrow,
  the display -> initWindow()
  Display controller provides 4Bit grayscale -> function only use monochrome data
  *********************************************************************************/
-void sendDataW128128(const uint8_t *tx_buf, uint16_t tx_num) {
-	uint16_t i, j;
-	uint16_t count = 0;
-	uint8_t byte;
-	//convert monochrome pixel data to 4Bit grayscale 0->0000; 1->1111
-	//see example below
-	for (i = 0; i < tx_num; i++) {
-		byte = tx_buf[i];
-		for (j = 0; j < 4; j++) {
-			disp_data[count] = disp_lookup[(byte & 0xC0) >> 6];
-			byte = byte << 2;
-			count++;
-		}
-	}
+void sendDataW128128(uint8_t *tx_buf, uint16_t tx_num) {
 	waitforemptybuffer(); //waits until SPI buffer is empty
-	R_RSPI0_Send(disp_data, (tx_num << 2)); //send data buffer via SPI
+	R_RSPI0_Send(tx_buf, tx_num); //send data buffer via SPI
 }
 
 #define ADDR_MPU 0x68
@@ -335,13 +322,16 @@ int main(void) {
 	initWindow(0, 127, 0, 127);
 	setDC(1); //set D/C# pin high
 
-	Canvas1bpp canvas(128, 128);
+	Canvas4bpp canvas(128, 128);
 	char buf[1024];
 
 	std::thread t_us(runUS);
 
 	int up, lt, ct, rt, dn;
 	double accel[3];
+
+	canvas.setBgColor(Canvas::COLOR_GRAY3);
+	canvas.setTextColor(Canvas::COLOR_WHITE, Canvas::COLOR_GRAY7);
 
 	while (1) {
 		canvas.clearScreen();
@@ -380,7 +370,7 @@ int main(void) {
 				us_dist.load(), accel[0], accel[1], accel[2], ctemp);
 		canvas.print(buf);
 
-		sendDataW128128(canvas.getBuffer(), 128 * 128 / 8);
+		sendDataW128128(canvas.getBuffer(), 128 * 128 / 2);
 		usleep(20 * 1000);
 	}
 

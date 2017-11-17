@@ -463,9 +463,9 @@ void Canvas::drawChar(coord_t x, coord_t y, unsigned char c, coord_t size) {
 		if (opaque) { // If opaque, draw vertical line for last column
 			colors.draw = colors.textbg;
 			if (size == 1) {
-				drawLine(x + 5, y, x + 5, y + 8);
+				drawLine(x + 5, y, x + 6 - 1, y + 8 - 1);
 			} else {
-				fillRect(x + 5 * size, y, x + 6 * size, y + 8 * size);
+				fillRect(x + 5 * size, y, x + 6 * size - 1, y + 8 * size - 1);
 			}
 		}
 
