@@ -4,3 +4,9 @@
 /.settings/
 /.project
 /.cproject
+
+/CMakeCache.txt
+/CMakeFiles/
+/Makefile
+/bin/
+/lib/

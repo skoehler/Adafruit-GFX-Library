@@ -8,7 +8,7 @@
 using std::chrono::steady_clock;
 using namespace GFX;
 
-void testFPS() {
+void testCircle() {
 	OLEDDisplay lcd(128, 128);
 
 	lcd.setBgColor(COLOR_BLACK);
@@ -38,6 +38,6 @@ void testFPS() {
 
 int main(void) {
 	printf("Starting\n");
-	testFPS();
+	testCircle();
 	return 0;
 }

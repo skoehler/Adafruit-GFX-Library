@@ -9,32 +9,32 @@ using std::chrono::steady_clock;
 using namespace GFX;
 
 void testBasicCommon(color_t bg, color_t fg) {
-	OLEDDisplay lcd(128, 128);
-	lcd.setBgColor(bg);
-	lcd.setDrawColor(fg);
-	lcd.clearScreen();
-	lcd.enable();
+	OLEDDisplay disp(128, 128);
+	disp.setBgColor(bg);
+	disp.setDrawColor(fg);
+	disp.clearScreen();
+	disp.enable();
 
-	lcd.drawRect(10, 40, 30, 50);
-	lcd.drawCircle(20, 20, 10);
-	lcd.fillCircle(50, 20, 10);
-	lcd.fillRect(40, 40, 60, 50);
+	disp.drawRect(10, 40, 30, 50);
+	disp.drawCircle(20, 20, 10);
+	disp.fillCircle(50, 20, 10);
+	disp.fillRect(40, 40, 60, 50);
 
-	lcd.drawLine(10, 10, 56, 56);
+	disp.drawLine(10, 10, 56, 56);
 
-	lcd.setCursor(10, 60);
-	lcd.setTextColor(fg);
-	lcd.print("Hello World!");
+	disp.setCursor(10, 60);
+	disp.setTextColor(fg);
+	disp.print("Hello World!");
 
-	lcd.setCursor(15, 65);
-	lcd.setTextColor(fg, bg);
-	lcd.print("Hello World!");
+	disp.setCursor(15, 65);
+	disp.setTextColor(fg, bg);
+	disp.print("Hello World!");
 
-	lcd.setCursor(20, 70);
-	lcd.setTextColor(fg);
-	lcd.print("Hello World!");
+	disp.setCursor(20, 70);
+	disp.setTextColor(fg);
+	disp.print("Hello World!");
 
-	lcd.flush();
+	disp.flush();
 	std::this_thread::sleep_for(std::chrono::seconds(5));
 }
 
@@ -47,19 +47,19 @@ void testBasic2() {
 }
 
 void testFPS() {
-	OLEDDisplay lcd(128, 128);
-	lcd.enable();
+	OLEDDisplay disp(128, 128);
+	disp.enable();
 
-	lcd.setBgColor(COLOR_BLACK);
-	lcd.setDrawColor(COLOR_WHITE);
+	disp.setBgColor(COLOR_BLACK);
+	disp.setDrawColor(COLOR_WHITE);
 
 	steady_clock::time_point lastTime = steady_clock::now();
-	uint32_t lastFC = lcd.getFrameCounter();
+	uint32_t lastFC = disp.getFrameCounter();
 
 	const int radius=10;
 	const int minX = radius;
-	const int maxX = lcd.getWidth() - radius;
-	const int maxY = lcd.getHeight() - radius;
+	const int maxX = disp.getWidth() - radius;
+	const int maxY = disp.getHeight() - radius;
 
 	float posx = 30;
 	float posy = 30;
@@ -87,13 +87,13 @@ void testFPS() {
 			speedy = -0.97 * speedy;
 		}
 
-		lcd.clearScreen();
-		lcd.fillCircle(posx, posy, radius);
-		lcd.flush();
+		disp.clearScreen();
+		disp.fillCircle(posx, posy, radius);
+		disp.flush();
 
 		steady_clock::time_point curTime = steady_clock::now();
 		if (curTime - lastTime >= std::chrono::seconds(1)) {
-			uint32_t curFC = lcd.getFrameCounter();
+			uint32_t curFC = disp.getFrameCounter();
 			printf("fps: %d\n", curFC - lastFC);
 			lastTime = curTime;
 			lastFC = curFC;
