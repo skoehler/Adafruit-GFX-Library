@@ -16,18 +16,21 @@ void testFPS() {
 	lcd.clearScreen();
 	lcd.enable();
 
-	lcd.drawCircle( 1,  5, 0);
-	lcd.drawCircle( 4,  5, 1);
-	lcd.drawCircle( 9,  5, 2);
-	lcd.drawCircle(16,  5, 3);
-	lcd.drawCircle(25,  5, 4);
-	lcd.drawCircle(36,  5, 5);
-	lcd.fillCircle( 1, 18, 0);
-	lcd.fillCircle( 4, 18, 1);
-	lcd.fillCircle( 9, 18, 2);
-	lcd.fillCircle(16, 18, 3);
-	lcd.fillCircle(25, 18, 4);
-	lcd.fillCircle(36, 18, 5);
+	for (int i=0, x=0; i<10; i++) {
+		lcd.drawCircle( x,  10, i);
+		x += 2*i+3;
+	}
+	for (int i=0, x=0; i<10; i++) {
+		lcd.fillCircle( x,  32, i);
+		x += 2*i+3;
+	}
+
+	lcd.drawRect(1, 42, 1+30, 42+20);
+	lcd.fillRect(35, 42, 35+30, 42+20);
+
+	lcd.drawRoundRect(1, 65, 1+30, 65+20, 7);
+	lcd.fillRoundRect(35, 65, 35+30, 65+20, 7);
+
 
 	lcd.flush();
 	std::this_thread::sleep_for(std::chrono::seconds(60));

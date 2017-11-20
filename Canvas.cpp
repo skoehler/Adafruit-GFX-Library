@@ -44,12 +44,12 @@ static inline int16_t min(int16_t a, int16_t b) {
 	return a < b ? a : b;
 }
 
-static inline void _swap_int16_t(coord_t &a, coord_t &b) {
+static inline void swapCoords(coord_t &a, coord_t &b) {
 	coord_t t = a;
 	a = b;
 	b = t;
 }
-static inline void _sort_int16_t(coord_t &a, coord_t &b) {
+static inline void sortCoords(coord_t &a, coord_t &b) {
 	if (a > b) {
 		coord_t t = a;
 		a = b;
@@ -80,13 +80,13 @@ Canvas::~Canvas() {
 void Canvas::writeLine(coord_t x0, coord_t y0, coord_t x1, coord_t y1, color_t color) {
 	coord_t steep = abs(y1 - y0) > abs(x1 - x0);
 	if (steep) {
-		_swap_int16_t(x0, y0);
-		_swap_int16_t(x1, y1);
+		swapCoords(x0, y0);
+		swapCoords(x1, y1);
 	}
 
 	if (x0 > x1) {
-		_swap_int16_t(x0, x1);
-		_swap_int16_t(y0, y1);
+		swapCoords(x0, x1);
+		swapCoords(y0, y1);
 	}
 
 	coord_t dx, dy;
@@ -138,8 +138,8 @@ void Canvas::fillRect(coord_t x0, coord_t y0, coord_t x1, coord_t y1) {
 	coord_t rx1 = realX(x1, y1);
 	coord_t ry1 = realY(x1, y1);
 
-	_sort_int16_t(rx0, rx1);
-	_sort_int16_t(ry0, ry1);
+	sortCoords(rx0, rx1);
+	sortCoords(ry0, ry1);
 
 	for (int16_t y = ry0; y <= ry1; y++) {
 		writeHLine(rx0, y, rx1, colors.draw);
@@ -166,10 +166,10 @@ void Canvas::drawLine(coord_t x0, coord_t y0, coord_t x1, coord_t y1) {
 	coord_t ry1 = realY(x1, y1);
 
 	if (rx0 == rx1) {
-		_sort_int16_t(y0, y1);
+		sortCoords(y0, y1);
 		writeVLine(rx0, ry0, ry1, colors.draw);
 	} else if (ry0 == ry1) {
-		_sort_int16_t(x0, x1);
+		sortCoords(x0, x1);
 		writeHLine(rx0, ry0, rx1, colors.draw);
 	} else {
 		writeLine(rx0, ry0, rx1, ry1, colors.draw);
@@ -274,10 +274,10 @@ void Canvas::fillCircleHelper(coord_t x0, coord_t y0, coord_t r, coord_t deltaX,
 		ddF_x += 2;
 		f += ddF_x;
 
-		writeHLine(x0 - x, y0 + y, x0 + x + deltaX, colors.draw);
-		writeHLine(x0 - y, y0 + x, x0 + y + deltaX, colors.draw);
-		writeHLine(x0 - x, y0 - y + deltaY, x0 + x + deltaX, colors.draw);
-		writeHLine(x0 - y, y0 - x + deltaY, x0 + y + deltaX, colors.draw);
+		writeHLine(x0 - x, y0 + y + deltaY, x0 + x + deltaX, colors.draw);
+		writeHLine(x0 - y, y0 + x + deltaY, x0 + y + deltaX, colors.draw);
+		writeHLine(x0 - x, y0 - y, x0 + x + deltaX, colors.draw);
+		writeHLine(x0 - y, y0 - x, x0 + y + deltaX, colors.draw);
 	}
 }
 
@@ -288,8 +288,8 @@ void Canvas::drawRect(coord_t x0, coord_t y0, coord_t x1, coord_t y1) {
 	coord_t rx1 = realX(x1, y1);
 	coord_t ry1 = realY(x1, y1);
 
-	_sort_int16_t(rx0, rx1);
-	_sort_int16_t(ry0, ry1);
+	sortCoords(rx0, rx1);
+	sortCoords(ry0, ry1);
 
 	writeHLine(rx0, ry0, rx1, colors.draw);
 	writeHLine(rx0, ry1, rx1, colors.draw);
@@ -304,14 +304,15 @@ void Canvas::drawRoundRect(coord_t x0, coord_t y0, coord_t x1, coord_t y1, coord
 	coord_t rx1 = realX(x1, y1);
 	coord_t ry1 = realY(x1, y1);
 
-	_sort_int16_t(rx0, rx1);
-	_sort_int16_t(ry0, ry1);
+	sortCoords(rx0, rx1);
+	sortCoords(ry0, ry1);
 
 	// smarter version
-	writeHLine(rx0 + r + 1, ry1, rx1 - r - 1, colors.draw); // Top
-	writeHLine(rx0 + r + 1, ry0, rx1 - r - 1, colors.draw); // Bottom
-	writeVLine(rx0, ry0 + r + 1, ry1 - r - 1, colors.draw); // Left
-	writeVLine(rx1, ry0 + r + 1, ry1 - r - 1, colors.draw); // Right
+	writeHLine(rx0 + r, ry0, rx1 - r - 1, colors.draw); // Top
+	writeHLine(rx0 + r + 1, ry1, rx1 - r, colors.draw); // Bottom
+	writeVLine(rx0, ry0 + r + 1, ry1 - r, colors.draw); // Left
+	writeVLine(rx1, ry0 + r, ry1 - r - 1, colors.draw); // Right
+
 	// draw four corners
 	drawCircleHelper(rx0 + r, ry0 + r, r, rx1 - rx0 - 2 * r, ry1 - ry0 - 2 * r);
 }
@@ -323,15 +324,14 @@ void Canvas::fillRoundRect(coord_t x0, coord_t y0, coord_t x1, coord_t y1, coord
 	coord_t rx1 = realX(x1, y1);
 	coord_t ry1 = realY(x1, y1);
 
-	_sort_int16_t(rx0, rx1);
-	_sort_int16_t(ry0, ry1);
+	sortCoords(rx0, rx1);
+	sortCoords(ry0, ry1);
 
-	for (int16_t y = ry0 + r + 1; y < ry1 - r; y++) {
+	for (int16_t y = ry0 + r; y <= ry1 - r; y++) {
 		writeHLine(rx0, y, rx1, colors.draw);
 	}
 
 	// draw four corners
-	fillCircleHelper(rx0 + r, ry1 - r, r, rx1 - rx0 - 2 * r, ry1 - ry0 - 2 * r);
 	fillCircleHelper(rx0 + r, ry0 + r, r, rx1 - rx0 - 2 * r, ry1 - ry0 - 2 * r);
 }
 
