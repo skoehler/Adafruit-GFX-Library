@@ -55,6 +55,7 @@ private:
 	bool wrap;
 
 	void drawChar(coord_t x, coord_t y, unsigned char c, coord_t size);
+	void drawGlyph(coord_t x, coord_t y, GFXglyph *glyph, coord_t size);
 
 	coord_t dirX(coord_t x, coord_t y) {
 		return mrot[0] * x + mrot[1] * y;

@@ -62,9 +62,7 @@ file( GLOB TEST3_SRC "test3/*.cpp" )
 ADD_EXECUTABLE( test3 ${TEST3_SRC} )
 TARGET_LINK_LIBRARIES( test3 gfx )
 
-
-
-
-
-
+file( GLOB TEST4_SRC "test4/*.cpp" )
+ADD_EXECUTABLE( test4 ${TEST4_SRC} )
+TARGET_LINK_LIBRARIES( test4 gfx )
 

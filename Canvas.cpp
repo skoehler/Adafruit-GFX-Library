@@ -706,91 +706,88 @@ void Canvas::drawChar(coord_t x, coord_t y, unsigned char c, coord_t size) {
 
 	bool opaque = (colors.text != colors.textbg);
 
-	if (!gfxFont) { // 'Classic' built-in font
+	if ((x >= _width) || // Clip right
+			(y >= _height) || // Clip bottom
+			((x + 6 * size - 1) < 0) || // Clip left
+			((y + 8 * size - 1) < 0))   // Clip top
+		return;
 
-		if ((x >= _width) || // Clip right
-				(y >= _height) || // Clip bottom
-				((x + 6 * size - 1) < 0) || // Clip left
-				((y + 8 * size - 1) < 0))   // Clip top
-			return;
-
-		for (int8_t i = 0; i < 5; i++) { // Char bitmap = 5 columns
-			uint8_t line = glcdfont[c * 5 + i];
-			for (int8_t j = 0; j < 8; j++, line >>= 1) {
-				bool draw = line & 1;
-				colors.draw = draw ? colors.text : colors.textbg;
-				if (opaque || draw) {
-					if (size == 1) {
-						drawPixel(x + i, y + j);
-					} else {
-						int16_t xp = x + i * size;
-						int16_t yp = y + i * size;
-						fillRect(xp, yp, xp + size - 1, yp + size - 1);
-					}
+	for (int8_t i = 0; i < 5; i++) { // Char bitmap = 5 columns
+		uint8_t line = glcdfont[c * 5 + i];
+		for (int8_t j = 0; j < 8; j++, line >>= 1) {
+			bool draw = line & 1;
+			colors.draw = draw ? colors.text : colors.textbg;
+			if (opaque || draw) {
+				if (size == 1) {
+					drawPixel(x + i, y + j);
+				} else {
+					int16_t xp = x + i * size;
+					int16_t yp = y + i * size;
+					fillRect(xp, yp, xp + size - 1, yp + size - 1);
 				}
 			}
 		}
-		if (opaque) { // If opaque, draw vertical line for last column
-			colors.draw = colors.textbg;
-			if (size == 1) {
-				drawLine(x + 5, y, x + 6 - 1, y + 8 - 1);
-			} else {
-				fillRect(x + 5 * size, y, x + 6 * size - 1, y + 8 * size - 1);
-			}
+	}
+	if (opaque) { // If opaque, draw vertical line for last column
+		colors.draw = colors.textbg;
+		if (size == 1) {
+			drawLine(x + 5, y, x + 6 - 1, y + 8 - 1);
+		} else {
+			fillRect(x + 5 * size, y, x + 6 * size - 1, y + 8 * size - 1);
 		}
+	}
+}
 
-	} else { // Custom font
+void Canvas::drawGlyph(coord_t x, coord_t y, GFXglyph *glyph, coord_t size) {
+	ColorSafe tmp(*this);
 
-		// Character is assumed previously filtered by write() to eliminate
-		// newlines, returns, non-printable characters, etc.  Calling
-		// drawChar() directly with 'bad' characters of font may cause mayhem!
+	// Character is assumed previously filtered by write() to eliminate
+	// newlines, returns, non-printable characters, etc.  Calling
+	// drawChar() directly with 'bad' characters of font may cause mayhem!
 
-		c -= (uint8_t) gfxFont->first;
-		GFXglyph *glyph = gfxFont->glyph + c;
-		uint8_t *bitmap = gfxFont->bitmap;
+	uint32_t bo = glyph->bitmapOffset;
+	coord_t xs = glyph->xOffset, ys = glyph->yOffset;
+	coord_t xe = xs + glyph->width, ye = ys + glyph->height;
+	uint8_t bits = 0, bit = 0;
 
-		uint16_t bo = glyph->bitmapOffset;
-		int16_t xs = glyph->xOffset, ys = glyph->yOffset;
-		int16_t xe = xs + glyph->width, ye = ys + glyph->height;
-		uint16_t xx, yy, bits = 0, bit = 0;
+	// Todo: Add character clipping here
 
-		// Todo: Add character clipping here
+	// NOTE: THERE IS NO 'BACKGROUND' COLOR OPTION ON CUSTOM FONTS.
+	// THIS IS ON PURPOSE AND BY DESIGN.  The background color feature
+	// has typically been used with the 'classic' font to overwrite old
+	// screen contents with new data.  This ONLY works because the
+	// characters are a uniform size; it's not a sensible thing to do with
+	// proportionally-spaced fonts with glyphs of varying sizes (and that
+	// may overlap).  To replace previously-drawn text when using a custom
+	// font, use the getTextBounds() function to determine the smallest
+	// rectangle encompassing a string, erase the area with fillRect(),
+	// then draw new text.  This WILL infortunately 'blink' the text, but
+	// is unavoidable.  Drawing 'background' pixels will NOT fix this,
+	// only creates a new set of problems.  Have an idea to work around
+	// this (a canvas object type for MCUs that can afford the RAM and
+	// displays supporting setAddrWindow() and pushColors()), but haven't
+	// implemented this yet.
 
-		// NOTE: THERE IS NO 'BACKGROUND' COLOR OPTION ON CUSTOM FONTS.
-		// THIS IS ON PURPOSE AND BY DESIGN.  The background color feature
-		// has typically been used with the 'classic' font to overwrite old
-		// screen contents with new data.  This ONLY works because the
-		// characters are a uniform size; it's not a sensible thing to do with
-		// proportionally-spaced fonts with glyphs of varying sizes (and that
-		// may overlap).  To replace previously-drawn text when using a custom
-		// font, use the getTextBounds() function to determine the smallest
-		// rectangle encompassing a string, erase the area with fillRect(),
-		// then draw new text.  This WILL infortunately 'blink' the text, but
-		// is unavoidable.  Drawing 'background' pixels will NOT fix this,
-		// only creates a new set of problems.  Have an idea to work around
-		// this (a canvas object type for MCUs that can afford the RAM and
-		// displays supporting setAddrWindow() and pushColors()), but haven't
-		// implemented this yet.
+	colors.draw = colors.text;
 
-		colors.draw = colors.text;
+	printf("drawing %d\n", glyph->bitmapOffset);
 
-		for (yy = ys; yy < ye; yy++) {
-			for (xx = xs; xx < xe; xx++) {
-				if (!(bit++ & 7)) {
-					bits = bitmap[bo++];
-				}
-				if (bits & 0x80) {
-					if (size == 1) {
-						drawPixel(x + xx, y + yy);
-					} else {
-						fillRect(x + xx * size, y + yy * size, x + (xx + 1) * size - 1, y + (yy + 1) * size - 1);
-					}
-				}
-				bits <<= 1;
+	uint8_t *bitmap = gfxFont->bitmap;
+	for (coord_t yy = ys; yy < ye; yy++) {
+		for (coord_t xx = xs; xx < xe; xx++) {
+			if (!(bit++ & 7)) {
+				bits = bitmap[bo++];
 			}
+			if (bits & 0x80) {
+				if (size == 1) {
+					drawPixel(x + xx, y + yy);
+				} else {
+					fillRect(x + xx * size, y + yy * size, x + (xx + 1) * size - 1, y + (yy + 1) * size - 1);
+				}
+			}
+			bits <<= 1;
 		}
-
-	} // End classic vs custom font
+	}
 }
 
 void Canvas::write(const char *data, size_t len) {
@@ -827,7 +824,7 @@ void Canvas::write(char c2) {
 		} else {
 			uint8_t first = gfxFont->first;
 			if ((c >= first) && (c <= gfxFont->last)) {
-				GFXglyph *glyph = gfxFont->glyph + (c - first);
+				GFXglyph *glyph = gfxFont->glyph + c - first;
 				uint8_t w = glyph->width, h = glyph->height;
 				if ((w > 0) && (h > 0)) { // Is there an associated bitmap?
 					int16_t xo = glyph->xOffset; // sic
@@ -835,7 +832,7 @@ void Canvas::write(char c2) {
 						cursor_x = 0;
 						cursor_y += (int16_t) textheight * gfxFont->yAdvance;
 					}
-					drawChar(cursor_x, cursor_y, c, textheight);
+					drawGlyph(cursor_x, cursor_y, glyph, textheight);
 				}
 				cursor_x += glyph->xAdvance * (int16_t) textheight;
 			}

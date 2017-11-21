@@ -3,35 +3,37 @@
 #include <stdio.h>
 #include <time.h>
 
+#include <chrono>
+
 #include "../OLEDDisplay.h"
 
 using namespace GFX;
 
 void testCircle() {
-	OLEDDisplay lcd(128, 128);
+	OLEDDisplay disp(128, 128);
 
-	lcd.setBgColor(COLOR_BLACK);
-	lcd.setDrawColor(COLOR_WHITE);
-	lcd.clearScreen();
-	lcd.enable();
+	disp.setBgColor(COLOR_BLACK);
+	disp.setDrawColor(COLOR_WHITE);
+	disp.clearScreen();
+	disp.enable();
 
-	for (int i=0, x=0; i<10; i++) {
-		lcd.drawCircle( x,  10, i);
+	for (int i=0, x=1; i<11; i++) {
+		disp.drawCircle( x,  10, i);
 		x += 2*i+3;
 	}
-	for (int i=0, x=0; i<10; i++) {
-		lcd.fillCircle( x,  32, i);
+	for (int i=0, x=1; i<11; i++) {
+		disp.fillCircle( x,  34, i);
 		x += 2*i+3;
 	}
 
-	lcd.drawRect(1, 42, 1+30, 42+20);
-	lcd.fillRect(35, 42, 35+30, 42+20);
+	disp.drawRect(1, 44, 1+30, 44+20);
+	disp.fillRect(35, 44, 35+30, 44+20);
 
-	lcd.drawRoundRect(1, 65, 1+30, 65+20, 7);
-	lcd.fillRoundRect(35, 65, 35+30, 65+20, 7);
+	disp.drawRoundRect(1, 67, 1+30, 67+20, 7);
+	disp.fillRoundRect(35, 67, 35+30, 67+20, 7);
 
 
-	lcd.flush();
+	disp.flush();
 	std::this_thread::sleep_for(std::chrono::seconds(60));
 }
 
