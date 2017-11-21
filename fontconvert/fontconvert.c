@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
 
 	printf("#include \"../gfxfont.h\"\n"
 			"\n"
-			"const uint8_t %sBitmaps[] PROGMEM = {\n", fontName);
+			"static const uint8_t %sBitmaps[] PROGMEM = {\n", fontName);
 
 	// Process glyphs and output huge bitmap data array
 	for(i=first, j=0; i<=last; i++, j++) {
@@ -199,7 +199,7 @@ int main(int argc, char *argv[]) {
 	printf(" };\n\n"); // End bitmap array
 
 	// Output glyph attributes table (one per character)
-	printf("const GFXglyph %sGlyphs[] PROGMEM = {\n", fontName);
+	printf("static const GFXglyph %sGlyphs[] PROGMEM = {\n", fontName);
 	for(i=first, j=0; i<=last; i++, j++) {
 		printf("  { %5d, %3d, %3d, %3d, %4d, %4d }",
 		  table[j].bitmapOffset,
