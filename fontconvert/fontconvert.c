@@ -131,7 +131,9 @@ int main(int argc, char *argv[]) {
 	// the right symbols, and that's not done yet.
 	// fprintf(stderr, "%ld glyphs\n", face->num_glyphs);
 
-	printf("const uint8_t %sBitmaps[] PROGMEM = {\n  ", fontName);
+	printf("#include \"../gfxfont.h\"\n"
+			"\n"
+			"const uint8_t %sBitmaps[] PROGMEM = {\n", fontName);
 
 	// Process glyphs and output huge bitmap data array
 	for(i=first, j=0; i<=last; i++, j++) {

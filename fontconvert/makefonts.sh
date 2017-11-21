@@ -29,7 +29,7 @@ do
 			infile=$inpath$f$st".ttf"
 			if [ -f $infile ] # Does source combination exist?
 			  then
-				outfile=$outpath$f$st$si"pt7b.h"
+				outfile=$outpath$f$st$si"pt7b.c"
 #				printf "%s %s %s > %s\n" $convert $infile $si $outfile
 				$convert $infile $si > $outfile
 			fi
