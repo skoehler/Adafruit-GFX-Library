@@ -1,3 +1,5 @@
+#include "../gfxfont.h"
+ 
 // Org_v01 by Orgdot (www.orgdot.com/aliasfonts).  A tiny,
 // stylized font with all characters within a 6 pixel height.
 

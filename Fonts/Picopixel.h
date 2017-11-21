@@ -1,3 +1,5 @@
+#include "../gfxfont.h"
+ 
 // Picopixel by Sebastian Weber.  A tiny font
 // with all characters within a 6 pixel height.
 
