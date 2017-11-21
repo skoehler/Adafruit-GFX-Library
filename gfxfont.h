@@ -9,10 +9,6 @@
 
 #include <stdint.h>
 
-#ifndef PROGMEM
-#define PROGMEM
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif

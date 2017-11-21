@@ -1,6 +1,6 @@
 #include "../gfxfont.h"
  
-const uint8_t FreeSansBoldOblique12pt7bBitmaps[] PROGMEM = {
+const uint8_t FreeSansBoldOblique12pt7bBitmaps[] = {
   0x1C, 0x3C, 0x78, 0xE1, 0xC3, 0x8F, 0x1C, 0x38, 0x70, 0xC1, 0x83, 0x00,
   0x1C, 0x78, 0xF0, 0x71, 0xFC, 0xFE, 0x3B, 0x8E, 0xC3, 0x30, 0xC0, 0x01,
   0x8C, 0x07, 0x38, 0x0C, 0x61, 0xFF, 0xF3, 0xFF, 0xE7, 0xFF, 0x83, 0x9C,
@@ -214,7 +214,7 @@ const uint8_t FreeSansBoldOblique12pt7bBitmaps[] PROGMEM = {
   0x0E, 0x07, 0x07, 0x8F, 0x87, 0xC3, 0xC0, 0x3C, 0x07, 0xE0, 0xC7, 0x30,
   0x7E, 0x01, 0xC0 };
 
-const GFXglyph FreeSansBoldOblique12pt7bGlyphs[] PROGMEM = {
+const GFXglyph FreeSansBoldOblique12pt7bGlyphs[] = {
   {     0,   0,   0,   7,    0,    1 },   // 0x20 ' '
   {     0,   7,  17,   8,    3,  -16 },   // 0x21 '!'
   {    15,  10,   6,  11,    4,  -17 },   // 0x22 '"'
@@ -311,7 +311,7 @@ const GFXglyph FreeSansBoldOblique12pt7bGlyphs[] PROGMEM = {
   {  2501,   9,  23,   9,    0,  -17 },   // 0x7D '}'
   {  2527,  12,   5,  14,    2,   -7 } }; // 0x7E '~'
 
-const GFXfont FreeSansBoldOblique12pt7b PROGMEM = {
+const GFXfont FreeSansBoldOblique12pt7b = {
   (uint8_t  *)FreeSansBoldOblique12pt7bBitmaps,
   (GFXglyph *)FreeSansBoldOblique12pt7bGlyphs,
   0x20, 0x7E, 29 };
