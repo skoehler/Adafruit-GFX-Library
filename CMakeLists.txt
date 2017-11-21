@@ -5,7 +5,7 @@
 
 CMAKE_MINIMUM_REQUIRED( VERSION 3.0.0 )
 
-PROJECT( gfx LANGUAGES CXX )
+PROJECT( gfx LANGUAGES C CXX )
 
 #
 # CONFIGURATION
@@ -14,6 +14,10 @@ PROJECT( gfx LANGUAGES CXX )
 SET( CMAKE_VERBOSE_MAKEFILE on )
 
 # Set compiler and linker flags
+SET( CMAKE_C_STANDARD 11 )
+SET( CMAKE_C_FLAGS "-Wall -fdiagnostics-color=always" )
+SET( CMAKE_C_FLAGS_DEBUG   "-Og -g" )
+SET( CMAKE_C_FLAGS_RELEASE "-O3 -g0" )
 SET( CMAKE_CXX_STANDARD 11 )
 SET( CMAKE_CXX_FLAGS "-Wall -fdiagnostics-color=always" )
 SET( CMAKE_CXX_FLAGS_DEBUG   "-Og -g" )
@@ -37,7 +41,7 @@ FIND_PACKAGE( Boost 1.65 REQUIRED COMPONENTS system )
 
 # display libraries
 file( GLOB GFX_SRC "*.cpp" )
-file( GLOB GFX_FONT_SRC "*.cpp" )
+file( GLOB GFX_FONT_SRC "Fonts/*.c" )
 ADD_LIBRARY( gfx ${GFX_SRC} ${GFX_FONT_SRC} )
 TARGET_LINK_LIBRARIES( gfx mraa ${CMAKE_THREAD_LIBS_INIT} )
 #TARGET_INCLUDE_DIRECTORIES( gfx PUBLIC some_dir )
