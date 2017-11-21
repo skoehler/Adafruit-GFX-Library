@@ -5,7 +5,6 @@
 
 #include "../OLEDDisplay.h"
 
-using std::chrono::steady_clock;
 using namespace GFX;
 
 void testCircle() {

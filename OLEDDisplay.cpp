@@ -42,9 +42,11 @@ OLEDDisplay::OLEDDisplay(coord_t width, coord_t height)
 	mR(spi.bitPerWord(8));
 	mR(spi.lsbmode(false));
 
-	coord_t rowsize = (WIDTH + 1)/2;
-	cmdBuf[0].assign(rowsize * HEIGHT, 0);
-	cmdBuf[1] = cmdBuf[0];
+	size_t bufsize = (WIDTH + 1)/2 * HEIGHT;
+	cmdBuf[0].reset(new uint8_t[bufsize]);
+	cmdBuf[1].reset(new uint8_t[bufsize]);
+	std::memset(cmdBuf[0].get(), 0, bufsize);
+	std::memset(cmdBuf[1].get(), 0, bufsize);
 	cmdBufIndex = 0;
 
 	flush();
@@ -100,8 +102,7 @@ void OLEDDisplay::enable() {
 	// start display thread
 	refreshEnabled = true;
 	refreshTerminate = false;
-	dispThread = std::thread(&OLEDDisplay::refreshDisplay, this,
-			cmdBuf[0].data(), cmdBuf[1].data(), cmdBuf[1].size());
+	dispThread = std::thread(&OLEDDisplay::refreshDisplay, this);
 }
 
 void OLEDDisplay::disable() {
@@ -114,14 +115,16 @@ void OLEDDisplay::disable() {
 	mR(dc.write(0));
 }
 
-void OLEDDisplay::refreshDisplay(uint8_t *data0, uint8_t *data1, int len) {
+void OLEDDisplay::refreshDisplay() {
 	// for good measure, wait a few ms until things have settled
 	std::this_thread::sleep_for(std::chrono::milliseconds(10));
 	std::unique_lock<std::mutex> refreshLock(refreshMutex);
 	refreshRunning = true;
 	refreshCond.notify_all();
 
-	uint8_t * const dataPtr[2] = {data0, data1};
+	size_t bufsize = (WIDTH + 1)/2 * HEIGHT;
+	uint8_t * const dataPtr[2] = {cmdBuf[0].get(), cmdBuf[1].get()};
+
 	while (!refreshTerminate) {
 		uint8_t index = cmdBufIndex;
 		uint8_t *data = dataPtr[index];
@@ -130,7 +133,7 @@ void OLEDDisplay::refreshDisplay(uint8_t *data0, uint8_t *data1, int len) {
 		refreshLock.unlock();
 		std::chrono::steady_clock::time_point t = std::chrono::steady_clock::now();
 		//TODO check for error
-		spi.transfer(data, NULL, len);
+		spi.transfer(data, NULL, bufsize);
 		refreshCond.notify_all();
 		std::this_thread::sleep_until(t + std::chrono::microseconds(16666));
 		refreshLock.lock();
@@ -146,10 +149,11 @@ uint32_t OLEDDisplay::getFrameCounter() {
 }
 
 void OLEDDisplay::flush() {
+	size_t bufsize = (WIDTH + 1)/2 * HEIGHT;
 	uint8_t freeIndex = 1 - cmdBufIndex;
-	uint8_t *dst = cmdBuf[freeIndex].data();
+	uint8_t *dst = cmdBuf[freeIndex].get();
 	uint8_t *src = this->getBuffer();
-	std::memcpy(dst, src, cmdBuf[freeIndex].size());
+	std::memcpy(dst, src, bufsize);
 	std::unique_lock<std::mutex> refreshLock(refreshMutex);
 	cmdBufIndex = freeIndex;
 	cmdBufUsed[freeIndex] = false;

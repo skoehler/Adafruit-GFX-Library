@@ -320,7 +320,7 @@ Canvas::Canvas(coord_t w, coord_t h) :
 		WIDTH(w), HEIGHT(h) {
 	cursor_y = cursor_x = 0;
 	textheight = 1;
-	wrap = true;
+	wrap = false;
 	gfxFont = NULL;
 	setRotation(0);
 }

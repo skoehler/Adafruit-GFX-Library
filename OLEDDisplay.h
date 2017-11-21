@@ -1,9 +1,8 @@
 #ifndef OLEDDISPLAY_H_
 #define OLEDDISPLAY_H_
 
-#include <vector>
-#include <thread>
 #include <mutex>
+#include <thread>
 #include <condition_variable>
 
 #include <mraa/gpio.hpp>
@@ -23,7 +22,7 @@ private:
 	/**
 	 * 2 additional Framebuffers
 	 */
-	std::vector<uint8_t> cmdBuf[2];
+	std::unique_ptr<uint8_t[]> cmdBuf[2];
 
 	std::mutex refreshMutex;
 	std::thread dispThread;
@@ -39,7 +38,7 @@ private:
 	uint8_t cmdBufIndex;
 	bool cmdBufUsed[2];
 
-	void refreshDisplay(uint8_t *data0, uint8_t *data1, int len);
+	void refreshDisplay();
 
 public:
 	OLEDDisplay(int width, int height);

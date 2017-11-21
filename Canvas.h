@@ -1,9 +1,7 @@
 #ifndef _ADAFRUIT_GFX_H
 #define _ADAFRUIT_GFX_H
 
-#include <cstddef>
 #include <cstdint>
-#include <vector>
 
 #include "Print.h"
 #include "gfxfont.h"
