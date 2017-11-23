@@ -519,7 +519,7 @@ void Canvas::fillTriangle(coord_t x0, coord_t y0, coord_t x1, coord_t y1, coord_
     // 0-2 and 1-2.  This loop is skipped if y1=y2.
     sa = dx12 * (y - ry1);
     sb = dx02 * (y - ry0);
-    for(; y<=y2; y++) {
+    for(; y<=ry2; y++) {
     	coord_t a   = rx1 + sa / dy12;
     	coord_t b   = rx0 + sb / dy02;
         sa += dx12;

@@ -32,6 +32,8 @@ void testCircle() {
 	disp.drawRoundRect(1, 67, 1+30, 67+20, 7);
 	disp.fillRoundRect(35, 67, 35+30, 67+20, 7);
 
+	disp.drawTriangle(80, 67, 80-10, 77, 80+10, 87);
+	disp.fillTriangle(105, 67, 105-10, 77, 105+10, 87);
 
 	disp.flush();
 	std::this_thread::sleep_for(std::chrono::seconds(60));
