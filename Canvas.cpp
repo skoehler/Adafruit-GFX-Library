@@ -1291,9 +1291,60 @@ void Canvas4bpp::writePixel(coord_t x, coord_t y, color_t color) {
 
 	size_t linelength = (WIDTH + 1) / 2;
 	uint8_t *ptr = buffer + (x / 2) + y * linelength;
-	uint8_t off = (x & 1) << 2;
-	*ptr = (*ptr & (0xF0F >> off)) | ((color & 0xF) << (4 - off));
+	uint8_t shift = (x & 1) << 2;
+	*ptr = (*ptr & (0xF0F >> shift)) | ((color & 0xF) << (4 - shift));
 }
+
+void Canvas4bpp::writeHLine(coord_t x0, coord_t y0, coord_t x1, color_t color) {
+	if (y0 < 0 || y0 >= HEIGHT)
+		return;
+	if (x0 < 0)
+		x0 = 0;
+	if (x1 >= WIDTH)
+		x1 = WIDTH-1;
+
+	uint8_t shift0 = (x0 & 1) << 2;
+	uint8_t shift1 = (x1 & 1) << 2;
+	uint8_t amask0 = (0xF00 >> shift0);
+	uint8_t amask1 = (0x00F >> shift1);
+
+	uint8_t omask = (color & 0xF) | ((color & 0xF) << 4);
+
+	size_t linelength = (WIDTH + 1) / 2;
+	uint8_t *ptr0 = buffer + (x0 / 2) + y0 * linelength;
+	uint8_t *ptr1 = buffer + (x1 / 2) + y0 * linelength;
+
+	if (ptr0 == ptr1) {
+		uint8_t amask = amask0 | amask1;
+		*ptr0 = (*ptr0 & amask) | (omask & ~amask);
+	} else if (ptr0 < ptr1) {
+		*ptr0 = (*ptr0 & amask0) | (omask & ~amask0);
+		for (ptr0++; ptr0 < ptr1; ptr0++) {
+			*ptr0 = omask;
+		}
+		*ptr1 = (*ptr1 & amask1) | (omask & ~amask1);
+	}
+}
+
+void Canvas4bpp::writeVLine(coord_t x0, coord_t y0, coord_t y1, color_t color) {
+	if (x0 < 0 || x0 >= WIDTH)
+		return;
+	if (y0 < 0)
+		x0 = 0;
+	if (y1 >= HEIGHT)
+		y1 = HEIGHT-1;
+
+	uint8_t shift = (x0 & 1) << 2;
+	uint8_t amask = (0xF0F >> shift);
+	uint8_t omask = (color & 0xF) << (4 - shift);
+
+	size_t linelength = (WIDTH + 1) / 2;
+	uint8_t *ptr1 = buffer + (x0 / 2) + y1 * linelength;
+	for (uint8_t *ptr0 = buffer + (x0 / 2) + y0 * linelength; ptr0 <= ptr1; ptr0 += linelength) {
+		*ptr0 = (*ptr0 & amask) | omask;
+	}
+}
+
 
 Canvas8bpp::Canvas8bpp(uint16_t w, uint16_t h) :
 		Canvas(w, h) {

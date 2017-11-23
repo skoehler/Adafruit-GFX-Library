@@ -207,6 +207,8 @@ public:
 protected:
 	virtual color_t translateColor(color_t color);
 	virtual void writePixel(coord_t x, coord_t y, color_t color);
+	virtual void writeHLine(coord_t x0, coord_t y0, coord_t x1, color_t color);
+	virtual void writeVLine(coord_t x0, coord_t y0, coord_t y1, color_t color);
 private:
 	uint8_t *buffer;
 };
