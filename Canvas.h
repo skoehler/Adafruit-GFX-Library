@@ -138,6 +138,8 @@ public:
 	void drawLine(coord_t x0, coord_t y0, coord_t x1, coord_t y1);
 	void drawRect(coord_t x0, coord_t y0, coord_t x1, coord_t y1);
 	void fillRect(coord_t x0, coord_t y0, coord_t x1, coord_t y1);
+	void drawTriangle(coord_t x0, coord_t y0, coord_t x1, coord_t y1, coord_t x2, coord_t y2);
+	void fillTriangle(coord_t x0, coord_t y0, coord_t x1, coord_t y1, coord_t x2, coord_t y2);
 	void drawCircle(coord_t x0, coord_t y0, coord_t r);
 	void fillCircle(coord_t x0, coord_t y0, coord_t r);
 	void drawRoundRect(coord_t x0, coord_t y0, coord_t x1, coord_t y1, coord_t radius);

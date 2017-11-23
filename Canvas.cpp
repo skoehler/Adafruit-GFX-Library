@@ -435,6 +435,105 @@ void Canvas::drawLine(coord_t x0, coord_t y0, coord_t x1, coord_t y1) {
 	}
 }
 
+void Canvas::drawTriangle(coord_t x0, coord_t y0, coord_t x1, coord_t y1, coord_t x2, coord_t y2) {
+    drawLine(x0, y0, x1, y1);
+    drawLine(x0, y0, x2, y2);
+    drawLine(x1, y1, x2, y2);
+}
+
+// Fill a triangle
+void Canvas::fillTriangle(coord_t x0, coord_t y0, coord_t x1, coord_t y1, coord_t x2, coord_t y2) {
+
+	coord_t rx0 = realX(x0, y0);
+	coord_t ry0 = realY(x0, y0);
+	coord_t rx1 = realX(x1, y1);
+	coord_t ry1 = realY(x1, y1);
+	coord_t rx2 = realX(x2, y2);
+	coord_t ry2 = realY(x2, y2);
+
+	//coord_t a, b, y, last;
+
+    // Sort coordinates by Y order (y2 >= y1 >= y0)
+    if (ry0 > ry1) {
+    	swapCoords(ry0, ry1); swapCoords(rx0, rx1);
+    }
+    if (ry1 > ry2) {
+    	swapCoords(ry2, ry1); swapCoords(rx2, rx1);
+    }
+    if (ry0 > ry1) {
+    	swapCoords(ry0, ry1); swapCoords(rx0, rx1);
+    }
+
+    if(ry0 == ry2) { // Handle awkward all-on-same-line case as its own thing
+        coord_t a = rx0;
+        coord_t b = rx0;
+        if(rx1 < a)
+        	a = rx1;
+        else if(rx1 > b)
+        	b = rx1;
+        if(rx2 < a)
+        	a = rx2;
+        else if(rx2 > b)
+        	b = rx2;
+        writeHLine(a, ry0, b, colors.draw);
+        return;
+    }
+
+    coord_t dx01 = rx1 - rx0;
+    coord_t dy01 = ry1 - ry0;
+	coord_t dx02 = rx2 - rx0;
+	coord_t dy02 = ry2 - ry0;
+	coord_t dx12 = rx2 - rx1;
+	coord_t dy12 = ry2 - ry1;
+	coord_t sa   = 0;
+	coord_t sb   = 0;
+
+    // For upper part of triangle, find scanline crossings for segments
+    // 0-1 and 0-2.  If y1=y2 (flat-bottomed triangle), the scanline y1
+    // is included here (and second loop will be skipped, avoiding a /0
+    // error there), otherwise scanline y1 is skipped here and handled
+    // in the second loop...which also avoids a /0 error here if y0=y1
+    // (flat-topped triangle).
+	coord_t last;
+    if(ry1 == ry2)
+    	last = ry1;   // Include y1 scanline
+    else
+    	last = ry1-1; // Skip it
+
+    coord_t y=ry0;
+    for(; y<=last; y++) {
+        coord_t a   = rx0 + sa / dy01;
+        coord_t b   = rx0 + sb / dy02;
+        sa += dx01;
+        sb += dx02;
+        /* longhand:
+        a = x0 + (x1 - x0) * (y - y0) / (y1 - y0);
+        b = x0 + (x2 - x0) * (y - y0) / (y2 - y0);
+        */
+        if (a > b)
+        	swapCoords(a, b);
+        writeHLine(a, y, b, colors.draw);
+    }
+
+    // For lower part of triangle, find scanline crossings for segments
+    // 0-2 and 1-2.  This loop is skipped if y1=y2.
+    sa = dx12 * (y - ry1);
+    sb = dx02 * (y - ry0);
+    for(; y<=y2; y++) {
+    	coord_t a   = rx1 + sa / dy12;
+    	coord_t b   = rx0 + sb / dy02;
+        sa += dx12;
+        sb += dx02;
+        /* longhand:
+        a = x1 + (x2 - x1) * (y - y1) / (y2 - y1);
+        b = x0 + (x2 - x0) * (y - y0) / (y2 - y0);
+        */
+        if (a > b)
+        	swapCoords(a, b);
+        writeHLine(a, y, b, colors.draw);
+    }
+}
+
 // Draw a circle outline
 void Canvas::drawCircle(coord_t x0, coord_t y0, coord_t r) {
 	coord_t rx0 = realX(x0, y0);
